@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Bienvenido</h2>
+                <p>Has iniciado sesión correctamente</p>
+            </div>
+
+            <div class="success-message show">
+                <div class="success-icon">👤</div>
+                
+                <h3>Usuario: {{ user_name }}</h3>
+                <p>Rol: {{ rol }}</p>
+
+                <br>
+
+                <button class="btn" onclick="logout()">
+                    Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+function logout() {
+    fetch("/logout", {
+        method: "POST"
+    }).then(() => {
+        window.location.href = "/login";
+    });
+}
+</script>
+
+</body>
+</html>
