@@ -46,10 +46,10 @@ def signup_view(request):
         email = data.get("email")
         password = data.get("password")
 
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(email=email).exists():
             return JsonResponse({
                 "success": False,
-                "message": "El usuario ya existe"
+                "message": "El correo ya está registrado."
             })
 
         user = User.objects.create_user(
