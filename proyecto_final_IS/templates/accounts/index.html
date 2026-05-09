@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log-In para práctica 4</title>
+    <title>Log-In</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <body>
     <div class="login-container">
         <div class="login-card">
@@ -39,7 +40,7 @@
             </form>
 
             <div class="divider">
-                <span>or continue with</span>
+                <span>o crea una cuenta aquí</span>
             </div>
 
             <div class="success-message" id="successMessage">
@@ -59,10 +60,12 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const response = await fetch("/login", {
+    const response = await fetch("/login/", {
+
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
             email: email,
