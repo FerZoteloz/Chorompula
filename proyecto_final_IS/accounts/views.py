@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 import json
 
@@ -36,4 +37,29 @@ def login_view(request):
         })
     
 def signup_view(request):
-    return render(request, 'accounts/signup.html')
+    if request.method == "GET":
+        return render(request, "accounts/signup.html")
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
+
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                "success": False,
+                "message": "El usuario ya existe"
+            })
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        login(request, user)
+
+        return JsonResponse({
+            "success": True
+        })
