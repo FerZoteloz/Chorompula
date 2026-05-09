@@ -34,3 +34,6 @@ def login_view(request):
             "success": False,
             "message": "Usuario o contraseña incorrectos"
         })
+    
+def signup_view(request):
+    return render(request, 'accounts/signup.html')

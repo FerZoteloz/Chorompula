@@ -440,6 +440,11 @@ body {
     margin-bottom: 24px;
 }
 
+.other-one-btn {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
 /* Divider */
 .divider {
     text-align: center;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log-In</title>
+    <title>Sign-Up</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
@@ -12,7 +12,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h2>Ingresa a tu cuenta</h2>
+                <h2>Crea una cuenta</h2>
             </div>
             
             <form class="login-form" id="loginForm" novalidate>
@@ -41,11 +41,11 @@
             </form>
 
             <div class="divider">
-                <span>o crea una cuenta aquí</span>
+                <span>o inicia sesión aquí</span>
             </div>
 
-            <a href="{% url 'signup' %}" class="other-one-btn btn">
-                <span class="btn-text">Crear cuenta</span>
+            <a href="{% url 'login' %}" class="other-one-btn btn">
+                <span class="btn-text">Iniciar sesión</span>
             </a>
         </div>
     </div>
