@@ -40,21 +40,6 @@ def login_view(request):
         except User.DoesNotExist:
             pass
 
-        """
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
-
-        if user is not None:
-            login(request, user)
-
-            return JsonResponse({
-                "success": True
-            })
-
-            """
         return JsonResponse({
             "success": False,
             "message": "Usuario o contraseña incorrectos"
