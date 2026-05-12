@@ -117,7 +117,7 @@ def course_detail_view(request, course_id):
 
     return render(
         request,
-        "courses/detail.html",
+        "dashboards/courses/course.html",
         {
             "course": course
         }
