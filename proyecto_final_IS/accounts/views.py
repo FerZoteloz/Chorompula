@@ -2,10 +2,11 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 # Create your views here.
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from accounts.models import Profile, Course, UsuarioCurso
+from django.db import transaction
+from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor
 import json
 
 def login_view(request):
@@ -20,25 +21,15 @@ def login_view(request):
         email = data.get("email")
         password = data.get("password")
 
-        try:
-            user_obj = User.objects.get(email=email)
+        user = authenticate(request, email=email, password=password)
 
-            user = authenticate(
-                request,
-                username=user_obj.username,
-                password=password
-            )
+        if user is not None:
 
-            if user is not None:
+            login(request, user)
 
-                login(request, user)
-
-                return JsonResponse({
-                    "success": True
-                })
-
-        except User.DoesNotExist:
-            pass
+            return JsonResponse({
+                "success": True
+            })
 
         return JsonResponse({
             "success": False,
@@ -55,28 +46,74 @@ def signup_view(request):
         email = data.get("email")
         password = data.get("password")
 
-        if User.objects.filter(email=email).exists():
+        nombre = data.get("nombre_pila")
+        ap_paterno = data.get("apellido_paterno")
+        ap_materno = data.get("apellido_materno")
+        rol = data.get("role", "student") # Usamos rol por defecto
+        
+
+        if CustomUser.objects.filter(email=email).exists():
             return JsonResponse({
                 "success": False,
                 "message": "El correo ya está registrado."
             })
+        
+        try:
+            with transaction.atomic():
+                # Creamos el usuario ya usando la separación de su nombre
+                user = CustomUser.objects.create_user(
+                    email=email,
+                    password=password,
+                    nombre_pila=nombre,
+                    apellido_paterno=ap_paterno,
+                    apellido_materno=ap_materno
+                )
 
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
+                #Creamos el perfil del usuario con el rol correspondiente
+                perfil = Profile.objects.create(user=user, role=rol)
 
-        Profile.objects.create(
-            user=user,
-            role="student"
-        )
+                # Lo integramos a las tablas hijas
+                # Cambie student por estudiante y teacher por profesor 
+                # para que coincida con el rol
+                if rol == "student":
+                    Alumno.objects.create(
+                        perfil=perfil,
+                        numero_cuenta=data.get("numero_cuenta")
+                    )
+                elif rol == "teacher":
+                    Profesor.objects.create(
+                        perfil=perfil,
+                        numero_empleado=data.get("numero_empleado"),
+                        especialidad=data.get("especialidad"),
+                        grado_academico=data.get("grado")
+                    )
 
-        login(request, user)
+            login(request, user)
+            return JsonResponse({"success": True})
+            
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
 
-        return JsonResponse({
-            "success": True
-        })
+"""
+
+    user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+
+            Profile.objects.create(
+                user=user,
+                role="student"
+            )
+
+            login(request, user)
+
+            return JsonResponse({
+                "success": True
+            })
+
+"""
     
 @login_required
 def dashboard_view(request):
