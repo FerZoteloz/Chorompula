@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from accounts.views import login_view, signup_view, dashboard_view, course_detail_view
+from accounts.views import login_view, signup_view, dashboard_view, course_detail_view, lista_usuarios_view, editar_usuario_view
 
 urlpatterns = [
     path('/', login_view, name='login'),
@@ -25,6 +25,8 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('signup/', signup_view, name='signup'),
     path('user/', signup_view, name='signup'),
+    path('admin-usuarios/', lista_usuarios_view, name='lista_usuarios'),
+    path('admin-usuarios/editar/<int:profile_id>/', editar_usuario_view, name='editar_usuario'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path(
         'course/<int:course_id>/',

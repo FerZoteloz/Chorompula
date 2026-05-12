@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 
 # Create your views here.
 from django.contrib.auth import authenticate, login
@@ -94,7 +94,7 @@ def dashboard_view(request):
     role = request.user.profile.role
 
     if role == "admin":
-        return render(request, "dashboards/admin.html", context)
+        return render(request, "admin_usuarios/lista_usuarios.html", context)
 
     elif role == "teacher":
         return render(request, "dashboards/teacher.html", context)
@@ -122,3 +122,46 @@ def course_detail_view(request, course_id):
             "course": course
         }
     )
+
+@login_required
+def lista_usuarios_view(request):
+    profiles = Profile.objects.all()
+
+    return render(request, "admin_usuarios/lista_usuarios.html", {
+        "profiles": profiles
+    })
+
+@login_required
+def editar_usuario_view(request, profile_id):
+    profile = Profile.objects.get(id=profile_id)
+
+    if request.method == "GET":
+        return render(request, "admin_usuarios/editar_usuario.html", {
+            "profile": profile
+        })
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        role = request.POST.get("role")
+
+        if User.objects.filter(username=username).exclude(id=profile.user.id).exists():
+            return render(request, "admin_usuarios/editar_usuario.html", {
+                "profile": profile,
+                "error": "Ese nombre de usuario ya está en uso"
+            })
+
+        if User.objects.filter(email=email).exclude(id=profile.user.id).exists():
+            return render(request, "admin_usuarios/editar_usuario.html", {
+                "profile": profile,
+                "error": "Ese correo ya está en uso"
+            })
+
+        profile.user.username = username
+        profile.user.email = email
+        profile.user.save()
+
+        profile.role = role
+        profile.save()
+
+        return redirect("/admin-usuarios/")
