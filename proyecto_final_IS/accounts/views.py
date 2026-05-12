@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from accounts.models import Profile
+from accounts.models import Profile, Course
 import json
 
 def login_view(request):
@@ -83,6 +83,16 @@ def dashboard_view(request):
 
     role = request.user.profile.role
 
+    courses = Course.objects.filter(
+        student=request.user
+    )
+
+    context = {
+        "courses": courses
+    }
+
+    role = request.user.profile.role
+
     if role == "admin":
         return render(request, "dashboards/admin.html")
 
@@ -90,4 +100,4 @@ def dashboard_view(request):
         return render(request, "dashboards/teacher.html")
 
     else:
-        return render(request, "dashboards/user.html")
+        return render(request, "dashboards/student.html")
