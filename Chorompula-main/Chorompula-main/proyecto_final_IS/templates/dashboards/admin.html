@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar-card">
+            <div class="user-profile">
+                <div class="profile-avatar">👤</div>
+                <h3>{{ user.username }}</h3>
+                <p>Administrador</p>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="/admin-usuarios/" class="nav-item active">Usuarios</a>
+                <a href="#" class="nav-item">Profesores</a>
+                <a href="#" class="nav-item">Estudiantes</a>
+                <a href="#" class="nav-item">Cursos</a>
+                <a href="#" class="nav-item">Configuración</a>
+            </nav>
+
+            <button class="btn logout-btn" onclick="logout()">Cerrar sesión</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h2>Panel de Administrador</h2>
+
+                <div class="stats-row">
+                    <div class="stat-badge">Gestión de usuarios</div>
+                    <div class="stat-badge">Control de roles</div>
+                </div>
+            </header>
+
+            <div class="courses-grid">
+
+                <div class="course-card">
+                    <div class="course-flag">
+                        👥
+                    </div>
+
+                    <div class="course-info">
+                        <h4>Usuarios registrados</h4>
+                        <p>Consulta usuarios y modifica su rol dentro del sistema.</p>
+                    </div>
+
+                    <a href="/admin-usuarios/" class="btn-sm" style="text-decoration:none;">
+                        Ver usuarios
+                    </a>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-flag">
+                        🧑‍🏫
+                    </div>
+
+                    <div class="course-info">
+                        <h4>Profesores</h4>
+                        <p>Los usuarios pueden ser asignados como profesores desde la gestión de roles.</p>
+                    </div>
+
+                    <a href="/admin-usuarios/" class="btn-sm" style="text-decoration:none;">
+                        Gestionar
+                    </a>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-flag">
+                        🎓
+                    </div>
+
+                    <div class="course-info">
+                        <h4>Estudiantes</h4>
+                        <p>Los nuevos registros se crean como estudiantes por defecto.</p>
+                    </div>
+
+                    <a href="/admin-usuarios/" class="btn-sm" style="text-decoration:none;">
+                        Revisar
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+<script>
+function logout() {
+    fetch("/logout", { method: "POST" }).then(() => {
+        window.location.href = "/login/";
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Usuario</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Crear usuario</h2>
+            <p>Registrar usuario con rol</p>
+        </div>
+
+        {% if error %}
+            <p style="color:#ffb3b3; text-align:center;">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" name="username" required>
+                    <label>Nombre de usuario</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="email" name="email" required>
+                    <label>Correo electrónico</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="password" name="password" required>
+                    <label>Contraseña</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <select name="role" class="btn" style="width:100%;">
+                    <option value="admin">Administrador</option>
+                    <option value="teacher">Profesor</option>
+                    <option value="student">Estudiante</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                Crear usuario
+            </button>
+        </form>
+
+        <a href="/dashboard/" class="btn other-one-btn">
+            Volver
+        </a>
+    </div>
+</div>
+</body>
+</html>
