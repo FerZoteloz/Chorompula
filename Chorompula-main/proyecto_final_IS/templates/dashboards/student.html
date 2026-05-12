@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar-card">
+            <div class="user-profile">
+                <div class="profile-avatar">👤</div>
+                <h3>{{ user.username }}</h3>
+                <p>Estudiante</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Mis Cursos</a>
+                <a href="#" class="nav-item">Pendientes</a>
+                <a href="#" class="nav-item">Recursos</a>
+                <a href="#" class="nav-item">Más cursos...</a>
+                <a href="#" class="nav-item">Configuración</a>
+            </nav>
+            <button class="btn logout-btn" onclick="logout()">Cerrar sesión</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h2>Mis Cursos de Idiomas</h2>
+                <div class="stats-row">
+                    <div class="stat-badge">✨No sé qué poner aquí✨</div>
+                    <div class="stat-badge">✨Ni aquí✨</div>
+                </div>
+            </header>
+
+            <div class="courses-grid">
+
+                {% for course in courses %}
+
+                <div class="course-card">
+
+                    <div class="course-flag">
+                        {{ course.flag }}
+                    </div>
+
+                    <div class="course-info">
+
+                        <h4>{{ course.title }}</h4>
+
+                        <p>
+                            Semana {{ course.week }}
+                            •
+                            {{ course.progress }}% completado
+                        </p>
+
+                        <div class="progress-bar-container">
+
+                            <div class="progress-fill" style="width: {{ course.progress }}%;"></div>
+
+                        </div>
+
+                    </div>
+
+                    <button class="btn-sm">
+                        Continuar
+                    </button>
+
+                </div>
+
+                {% empty %}
+
+                <p>Aún no tienes cursos registrados.</p>
+
+                {% endfor %}
+
+            </div>
+            
+        </main>
+    </div>
+
+<script>
+function logout() {
+    fetch("/logout", { method: "POST" }).then(() => {
+        window.location.href = "/login";
+    });
+}
+</script>
+</body>
+</html>

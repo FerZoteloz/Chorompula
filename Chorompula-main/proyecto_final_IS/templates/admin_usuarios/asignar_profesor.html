@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Asignar Profesor</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Asignar profesor</h2>
+            <p>Curso: {{ curso.title }}</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <select name="profesor_id" class="btn" style="width:100%;">
+                    {% for profesor in profesores %}
+                        <option value="{{ profesor.id }}">
+                            {{ profesor.username }} - {{ profesor.email }}
+                        </option>
+                    {% empty %}
+                        <option disabled>No hay profesores disponibles</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                Asignar profesor
+            </button>
+        </form>
+
+        <a href="/admin-cursos/{{ curso.id }}/" class="btn other-one-btn">
+            Volver al curso
+        </a>
+
+        <a href="/admin-usuarios/" class="btn other-one-btn">
+            Cambiar rol de usuarios
+        </a>
+    </div>
+</div>
+</body>
+</html>

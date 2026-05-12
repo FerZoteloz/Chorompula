@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-Up</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+    <body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Crea una cuenta</h2>
+            </div>
+            
+            <form class="login-form" id="signupForm" novalidate>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                        <label for="email">Correo electrónico</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                        <label for="username">Nombre de usuario</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="usernameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                        <label for="password">Contraseña</label>
+                        <span class="focus-border"></span>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <button type="submit" class="login-btn btn">
+                    <span class="btn-text">Crear cuenta</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>o inicia sesión aquí</span>
+            </div>
+
+            <a href="{% url 'login' %}" class="other-one-btn btn">
+                <span class="btn-text">Iniciar sesión</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const response = await fetch("/signup/", {
+
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+
+            username: document.getElementById("username").value,
+
+            email: document.getElementById("email").value,
+
+            password: document.getElementById("password").value
+        })
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+        alert("Cuenta creada");
+
+        window.location.href = "/login/";
+
+    } else {
+
+        alert(data.message);
+    }
+});
+</script>
+
+</html>

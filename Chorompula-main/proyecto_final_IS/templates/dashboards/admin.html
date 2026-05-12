@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar-card">
+        <div class="user-profile">
+            <div class="profile-avatar">👤</div>
+            <h3>{{ user.username }}</h3>
+            <p>Administrador</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="/dashboard/" class="nav-item active">Cursos</a>
+            <a href="/admin-usuarios/" class="nav-item">Usuarios generales</a>
+            <a href="#" class="nav-item">Configuración</a>
+        </nav>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <header class="content-header">
+            <h2>Panel de Administrador</h2>
+
+            <div class="stats-row">
+                <button class="stat-badge" onclick="logout()" style="border:none; cursor:pointer;">
+                    Cerrar sesión
+                </button>
+            </div>
+        </header>
+
+        <section style="margin-top: 24px;">
+    <h3 style="color:white; margin-bottom: 18px;">Cursos</h3>
+
+    {% if cursos %}
+        <div style="margin-bottom: 20px;">
+            <a href="/admin-cursos/crear/" class="btn-sm" style="text-decoration:none;">
+                Crear curso
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="courses-grid">
+        {% for curso in cursos %}
+            <div class="course-card">
+                <div class="course-flag">📘</div>
+
+                <div class="course-info">
+                    <h4>{{ curso.title }}</h4>
+                    <p>
+                        Idioma: {{ curso.language }}<br>
+                        Estado: {{ curso.get_status_display }}
+                    </p>
+                </div>
+
+                <a href="/admin-cursos/{{ curso.id }}/" class="btn-sm" style="text-decoration:none;">
+                    Ver curso
+                </a>
+            </div>
+        {% empty %}
+            <div class="course-card">
+                <div class="course-flag">📚</div>
+
+                <div class="course-info">
+                    <h4>Aún no hay cursos</h4>
+                    <p>Crea el primer curso para comenzar a administrar usuarios por curso.</p>
+                </div>
+
+                <a href="/admin-cursos/crear/" class="btn-sm" style="text-decoration:none;">
+                    Crear curso
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+    </main>
+</div>
+
+<script>
+function logout() {
+    window.location.href = "/login/";
+}
+</script>
+</body>
+</html>
