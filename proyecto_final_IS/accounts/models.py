@@ -43,3 +43,32 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+    
+class UsuarioCurso(models.Model):
+    ROL_CURSO_CHOICES = (
+        ('teacher', 'Profesor'),
+        ('student', 'Estudiante'),
+    )
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    curso = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE
+    )
+
+    rol_en_curso = models.CharField(
+        max_length=20,
+        choices=ROL_CURSO_CHOICES
+    )
+
+    fecha_asignacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('usuario', 'curso', 'rol_en_curso')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.curso.title} - {self.rol_en_curso}"

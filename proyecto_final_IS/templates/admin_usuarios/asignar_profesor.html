@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Asignar Profesor</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Asignar profesor</h2>
+            <p>Curso: {{ curso.title }}</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <select name="profesor_id" class="btn" style="width:100%;">
+                    {% for profesor in profesores %}
+                        <option value="{{ profesor.id }}">
+                            {{ profesor.username }} - {{ profesor.email }}
+                        </option>
+                    {% empty %}
+                        <option disabled selected>No hay profesores disponibles</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if profesores %}
+                <button type="submit" class="btn login-btn">
+                    Asignar profesor
+                </button>
+            {% else %}
+                <p style="color:white; text-align:center; margin-top:15px;">
+                    Primero cambia el rol de un usuario a Profesor.
+                </p>
+            {% endif %}
+        </form>
+
+        <div style="display:flex; gap:10px; margin-top:20px; justify-content:center; flex-wrap:wrap;">
+            <a href="/admin-cursos/{{ curso.id }}/"
+               style="padding:12px 16px; border-radius:10px; background:linear-gradient(135deg,#6366f1,#06b6d4); color:white; text-decoration:none; font-weight:600;">
+                Volver al curso
+            </a>
+
+            <a href="/admin-usuarios/"
+               style="padding:12px 16px; border-radius:10px; background:linear-gradient(135deg,#6366f1,#06b6d4); color:white; text-decoration:none; font-weight:600;">
+                Cambiar rol de usuarios
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

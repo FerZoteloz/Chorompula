@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from accounts.models import Profile, Course
+from accounts.models import Profile, Course, UsuarioCurso
 import json
 
 def login_view(request):
@@ -165,3 +165,86 @@ def editar_usuario_view(request, profile_id):
         profile.save()
 
         return redirect("/admin-usuarios/")
+    
+
+@login_required
+def crear_curso_view(request):
+    if request.user.profile.role != "admin":
+        return redirect("/dashboard/")
+
+    if request.method == "GET":
+        return render(request, "dashboards/crear_curso.html")
+
+    if request.method == "POST":
+        title = request.POST.get("nombre")
+        language = request.POST.get("idioma")
+        description = request.POST.get("descripcion")
+        status = request.POST.get("estado")
+
+        Course.objects.create(
+            title=title,
+            language=language,
+            description=description,
+            status=status,
+            creator=request.user,
+            flag="📘"
+        )
+
+        return redirect("/dashboard/")
+
+
+@login_required
+def detalle_curso_view(request, course_id):
+    if request.user.profile.role != "admin":
+        return redirect("/dashboard/")
+
+    curso = get_object_or_404(Course, id=course_id)
+
+    profesores = UsuarioCurso.objects.filter(
+        curso=curso,
+        rol_en_curso="teacher"
+    )
+
+    estudiantes = UsuarioCurso.objects.filter(
+        curso=curso,
+        rol_en_curso="student"
+    )
+
+    return render(request, "admin_usuarios/detalle_curso.html", {
+        "curso": curso,
+        "profesores": profesores,
+        "estudiantes": estudiantes
+    })
+
+
+@login_required
+def asignar_profesor_view(request, course_id):
+    if request.user.profile.role != "admin":
+        return redirect("/dashboard/")
+
+    curso = get_object_or_404(Course, id=course_id)
+
+    profesores_disponibles = User.objects.filter(
+        profile__role="teacher"
+    ).exclude(
+        usuariocurso__curso=curso,
+        usuariocurso__rol_en_curso="teacher"
+    )
+
+    if request.method == "GET":
+        return render(request, "admin_usuarios/asignar_profesor.html", {
+            "curso": curso,
+            "profesores": profesores_disponibles
+        })
+
+    if request.method == "POST":
+        profesor_id = request.POST.get("profesor_id")
+        profesor = get_object_or_404(User, id=profesor_id)
+
+        UsuarioCurso.objects.get_or_create(
+            usuario=profesor,
+            curso=curso,
+            rol_en_curso="teacher"
+        )
+
+        return redirect(f"/admin-cursos/{curso.id}/")

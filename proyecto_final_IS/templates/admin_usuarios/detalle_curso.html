@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del curso</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <aside class="sidebar-card">
+        <div class="user-profile">
+            <div class="profile-avatar">📘</div>
+            <h3>{{ curso.title }}</h3>
+            <p>{{ curso.language }}</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="/dashboard/" class="nav-item">Volver a cursos</a>
+            <a href="/admin-cursos/{{ curso.id }}/asignar-profesor/" class="nav-item active">Asignar profesor</a>
+            <a href="/admin-usuarios/" class="nav-item">Usuarios generales</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h2>{{ curso.title }}</h2>
+
+            <div class="stats-row">
+                <div class="stat-badge">Estado: {{ curso.get_status_display }}</div>
+                <div class="stat-badge">Idioma: {{ curso.language }}</div>
+            </div>
+        </header>
+
+        <section style="margin-top: 24px;">
+            <h3 style="color:white; margin-bottom: 18px;">Profesores asignados</h3>
+
+            <div class="courses-grid">
+                {% for relacion in profesores %}
+                    <div class="course-card">
+                        <div class="course-flag">🧑‍🏫</div>
+
+                        <div class="course-info">
+                            <h4>{{ relacion.usuario.username }}</h4>
+                            <p>{{ relacion.usuario.email }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="course-card">
+                        <div class="course-flag">🧑‍🏫</div>
+
+                        <div class="course-info">
+                            <h4>No hay profesores asignados</h4>
+                            <p>Asigna un profesor para este curso.</p>
+                        </div>
+
+                        <a href="/admin-cursos/{{ curso.id }}/asignar-profesor/" class="btn-sm" style="text-decoration:none;">
+                            Asignar profesor
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section style="margin-top: 32px;">
+            <h3 style="color:white; margin-bottom: 18px;">Estudiantes inscritos</h3>
+
+            <div class="courses-grid">
+                {% for relacion in estudiantes %}
+                    <div class="course-card">
+                        <div class="course-flag">🎓</div>
+
+                        <div class="course-info">
+                            <h4>{{ relacion.usuario.username }}</h4>
+                            <p>{{ relacion.usuario.email }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="course-card">
+                        <div class="course-flag">🎓</div>
+
+                        <div class="course-info">
+                            <h4>No hay estudiantes inscritos</h4>
+                            <p>Cuando los alumnos se inscriban aparecerán aquí.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>
