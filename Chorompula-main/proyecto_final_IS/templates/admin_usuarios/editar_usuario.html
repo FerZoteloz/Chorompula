@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Usuario</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Editar usuario</h2>
+            <p>Cambiar datos o rol del usuario</p>
+        </div>
+
+        {% if error %}
+            <p style="color:#ffb3b3; text-align:center;">{{ error }}</p>
+        {% endif %}
+
+        <div style="color:white; margin-bottom:20px; padding:12px; border:1px solid rgba(255,255,255,0.3); border-radius:12px;">
+            <p><strong>Usuario actual:</strong> {{ profile.user.username }}</p>
+            <p><strong>Correo actual:</strong> {{ profile.user.email }}</p>
+            <p><strong>Rol actual:</strong> {{ profile.get_role_display }}</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" name="username" value="{{ profile.user.username }}" required>
+                    <label>Nombre de usuario</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="email" name="email" value="{{ profile.user.email }}" required>
+                    <label>Correo electrónico</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <select name="role" class="btn" style="width:100%;">
+                    <option value="student" {% if profile.role == "student" %}selected{% endif %}>Estudiante</option>
+                    <option value="teacher" {% if profile.role == "teacher" %}selected{% endif %}>Profesor</option>
+                    <option value="admin" {% if profile.role == "admin" %}selected{% endif %}>Administrador</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                Guardar cambios
+            </button>
+        </form>
+
+        <a href="/admin-usuarios/" class="btn other-one-btn">
+            Volver
+        </a>
+    </div>
+</div>
+</body>
+</html>

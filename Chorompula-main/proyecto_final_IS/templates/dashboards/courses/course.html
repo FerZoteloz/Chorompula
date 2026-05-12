@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clase: Inglés B2</title>
+    <link rel="stylesheet" href="{% static 'course.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar-card">
+            <div class="user-profile">
+                <div class="profile-avatar">👤</div>
+                <h3>{{ user.username }}</h3>
+                <p>Estudiante</p>
+            </div>
+            <nav class="nav-menu">
+                <a href="/dashboard" class="nav-item">🏠 Inicio</a>
+                <a href="#" class="nav-item active">📚 Inglés B2</a>
+                <a href="#" class="nav-item">📅 Calendario</a>
+                <a href="#" class="nav-item">📝 Tareas</a>
+            </nav>
+            <button class="btn logout-btn" onclick="logout()">Volver</button>
+        </aside>
+
+        <!-- Main Course Content -->
+        <main class="main-content">
+            <!-- Course Banner -->
+            <section class="course-banner">
+                <div class="banner-content">
+                    <h1>Inglés de Negocios B2</h1>
+                    <p>Prof. Alejandro García • Sección 04</p>
+                </div>
+                <div class="course-code">Código: <span>XJ82-L9</span></div>
+            </section>
+
+            <div class="classroom-grid">
+                <!-- Left Column: Stream / Announcements -->
+                <div class="stream-column">
+                    <!-- Share something box -->
+                    <div class="announcement-card share-box">
+                        <div class="mini-avatar">👤</div>
+                        <input type="text" placeholder="Anuncia algo a tu clase...">
+                    </div>
+
+                    <!-- Material Post -->
+                    <div class="announcement-card">
+                        <div class="post-header">
+                            <div class="mini-avatar teacher">👨‍🏫</div>
+                            <div class="post-meta">
+                                <strong>Prof. Alejandro García</strong>
+                                <span>Publicado a las 10:30 AM</span>
+                            </div>
+                        </div>
+                        <div class="post-body">
+                            <p>Hola a todos. He subido el material para la sesión de "Financial Vocabulary". Por favor, revísenlo antes de la clase de mañana.</p>
+                            <div class="attachment-item">
+                                <span class="file-icon">📄</span>
+                                <div class="file-info">
+                                    <p>Business_Vocab_Unit3.pdf</p>
+                                    <span>PDF • 2.4 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assignment Post -->
+                    <div class="announcement-card">
+                        <div class="post-header">
+                            <div class="mini-avatar assignment">📝</div>
+                            <div class="post-meta">
+                                <strong>Nueva Tarea: Case Study Analysis</strong>
+                                <span>Vence mañana, 23:59</span>
+                            </div>
+                        </div>
+                        <button class="btn-sm outline">Ver instrucciones</button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Sidebar Tasks -->
+                <div class="upcoming-column">
+                    <div class="upcoming-card">
+                        <h4>Próximas entregas</h4>
+                        <ul class="task-list">
+                            <li>
+                                <p><strong>Mañana</strong></p>
+                                <span>23:59 - Case Study</span>
+                            </li>
+                            <li>
+                                <p><strong>Viernes</strong></p>
+                                <span>18:00 - Quiz Semanal</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="view-all">Ver todo</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
