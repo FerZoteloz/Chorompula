@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from django.contrib.auth import authenticate, login
@@ -94,10 +94,31 @@ def dashboard_view(request):
     role = request.user.profile.role
 
     if role == "admin":
-        return render(request, "dashboards/admin.html")
+        return render(request, "dashboards/admin.html", context)
 
     elif role == "teacher":
-        return render(request, "dashboards/teacher.html")
+        return render(request, "dashboards/teacher.html", context)
 
     else:
-        return render(request, "dashboards/student.html")
+        return render(
+            request,
+            "dashboards/student.html",
+            context
+        )
+    
+
+@login_required
+def course_detail_view(request, course_id):
+
+    course = get_object_or_404(
+        Course,
+        id=course_id
+    )
+
+    return render(
+        request,
+        "courses/detail.html",
+        {
+            "course": course
+        }
+    )

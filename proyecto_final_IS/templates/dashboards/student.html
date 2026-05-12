@@ -40,6 +40,10 @@
 
                 {% for course in courses %}
 
+                <a
+                    href="{% url 'course_detail' course.id %}"
+                    class="course-card-link"
+                >
                 <div class="course-card">
 
                     <div class="course-flag">
@@ -58,10 +62,10 @@
 
                         <div class="progress-bar-container">
 
-                            <div>
+                            <div
                                 class="progress-fill"
                                 style="width: {{ course.progress }}%;"
-                            </div>
+                            ></div>
 
                         </div>
 
@@ -72,6 +76,7 @@
                     </button>
 
                 </div>
+                </a>
 
                 {% empty %}
 
@@ -86,9 +91,7 @@
 
 <script>
 function logout() {
-    fetch("/logout", { method: "POST" }).then(() => {
-        window.location.href = "/login";
-    });
+    window.location.href = "/login/";
 }
 </script>
 </body>

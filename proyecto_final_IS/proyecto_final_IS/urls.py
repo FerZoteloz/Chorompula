@@ -17,12 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from accounts.views import login_view, signup_view, dashboard_view
+from accounts.views import login_view, signup_view, dashboard_view, course_detail_view
 
 urlpatterns = [
+    path('/', login_view, name='login'),
     path('admin/', admin.site.urls),
     path('login/', login_view, name='login'),
     path('signup/', signup_view, name='signup'),
     path('user/', signup_view, name='signup'),
     path('dashboard/', dashboard_view, name='dashboard'),
+    path(
+        'course/<int:course_id>/',
+        course_detail_view,
+        name='course_detail'
+    ),
 ]
