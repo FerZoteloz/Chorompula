@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from accounts.views import (
     login_view,
@@ -28,6 +30,10 @@ from accounts.views import (
     crear_curso_view,
     detalle_curso_view,
     asignar_profesor_view,
+# Ini.FS.19.05.2026
+    profile_settings_view,
+    settings_view,
+# Fin.FS.19.05.2026
 )
 
 urlpatterns = [
@@ -47,10 +53,14 @@ urlpatterns = [
     path('admin-cursos/crear/', crear_curso_view, name='crear_curso'),
     path('admin-cursos/<int:course_id>/', detalle_curso_view, name='detalle_curso'),
     path('admin-cursos/<int:course_id>/asignar-profesor/', asignar_profesor_view, name='asignar_profesor'),
-
+# Ini.FS.19.05.2026
+    path('perfil/', profile_settings_view, name='profile_settings'),
+    path('configuracion/', settings_view, name='settings'),
+# Fin.FS.19.05.2026
     path(
         'course/<int:course_id>/',
         course_detail_view,
         name='course_detail'
     ),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

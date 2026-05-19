@@ -2,15 +2,15 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 # Create your views here.
 from django.contrib.auth import authenticate, login, logout
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
 from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor
 import json
 
+
 def login_view(request):
-    
     if request.method == "GET":
         return render(request, "accounts/index.html")
 
@@ -57,7 +57,7 @@ def login_view(request):
     }, status=405)
 
 
-#=============================================
+# =============================================
 
 @login_required
 def logout_view(request):
@@ -70,8 +70,9 @@ def logout_view(request):
 
     return redirect("/login/")
 
-#=============================================
-    
+
+# =============================================
+
 def signup_view(request):
     if request.method == "GET":
         return render(request, "accounts/signup.html")
@@ -111,7 +112,7 @@ def signup_view(request):
                 "success": False,
                 "message": "El correo ya está registrado."
             }, status=400)
-        
+
         try:
             with transaction.atomic():
                 # Creamos el usuario usando el correo como identificador.
@@ -148,7 +149,7 @@ def signup_view(request):
             return JsonResponse({
                 "success": True
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 "success": False,
@@ -160,7 +161,8 @@ def signup_view(request):
         "message": "Método no permitido."
     }, status=405)
 
-#===========================================
+
+# ===========================================
 
 """
 
@@ -182,10 +184,10 @@ def signup_view(request):
             })
 
 """
-    
+
+
 @login_required
 def dashboard_view(request):
-
     role = request.user.profile.role
 
     courses = Course.objects.filter(
@@ -210,11 +212,10 @@ def dashboard_view(request):
             "dashboards/student.html",
             context
         )
-    
+
 
 @login_required
 def course_detail_view(request, course_id):
-
     course = get_object_or_404(
         Course,
         id=course_id
@@ -228,6 +229,7 @@ def course_detail_view(request, course_id):
         }
     )
 
+
 @login_required
 def lista_usuarios_view(request):
     profiles = Profile.objects.all()
@@ -236,7 +238,8 @@ def lista_usuarios_view(request):
         "profiles": profiles
     })
 
-@login_required
+
+"""@login_required
 def editar_usuario_view(request, profile_id):
     profile = Profile.objects.get(id=profile_id)
 
@@ -269,8 +272,46 @@ def editar_usuario_view(request, profile_id):
         profile.role = role
         profile.save()
 
+        return redirect("/admin-usuarios/")"""
+
+
+# Ini.FS.19.05.2026
+@login_required
+@login_required
+def editar_usuario_view(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id)
+
+    if request.method == "GET":
+        return render(request, "admin_usuarios/editar_usuario.html", {
+            "profile": profile
+        })
+
+    if request.method == "POST":
+        nombre_pila = request.POST.get("nombre_pila")
+        apellido_paterno = request.POST.get("apellido_paterno")
+        apellido_materno = request.POST.get("apellido_materno")
+        email = request.POST.get("email")
+        role = request.POST.get("role")
+
+        if CustomUser.objects.filter(email=email).exclude(id=profile.user.id).exists():
+            return render(request, "admin_usuarios/editar_usuario.html", {
+                "profile": profile,
+                "error": "Ese correo ya está en uso"
+            })
+
+        profile.user.nombre_pila = nombre_pila
+        profile.user.apellido_paterno = apellido_paterno
+        profile.user.apellido_materno = apellido_materno
+        profile.user.email = email
+        profile.user.save()
+
+        profile.role = role
+        profile.save()
+
         return redirect("/admin-usuarios/")
-    
+
+
+# Fin.FS.19.05.2026
 
 @login_required
 def crear_curso_view(request):
@@ -353,3 +394,52 @@ def asignar_profesor_view(request, course_id):
         )
 
         return redirect(f"/admin-cursos/{curso.id}/")
+
+
+# Ini.FS.19.05.2026
+@login_required
+def profile_settings_view(request):
+    profile = request.user.profile
+
+    emoji_options = [
+        "👤", "😀", "😎", "🤓", "🧑‍💻",
+        "🐱", "🐶", "🦊", "🐼", "🐧",
+        "🚀", "⭐", "🔥", "🌙", "☀️",
+        "🎮", "📚", "🎧", "⚽", "🍀"
+    ]
+
+    if request.method == "POST":
+        selected_emoji = request.POST.get("avatar_emoji")
+        avatar_image = request.FILES.get("avatar_image")
+
+        # Primero revisamos si subió imagen
+        if avatar_image:
+            if profile.avatar_image:
+                profile.avatar_image.delete(save=False)
+
+            profile.avatar_image = avatar_image
+            profile.save()
+            return redirect("dashboard")
+
+        # Si no subió imagen, entonces revisamos emoji
+        if selected_emoji in emoji_options:
+            if profile.avatar_image:
+                profile.avatar_image.delete(save=False)
+
+            profile.avatar_image = None
+            profile.avatar_emoji = selected_emoji
+            profile.save()
+            return redirect("dashboard")
+
+        return redirect("profile_settings")
+
+    return render(request, "accounts/profile_settings.html", {
+        "profile": profile,
+        "emoji_options": emoji_options
+    })
+
+
+@login_required
+def settings_view(request):
+    return render(request, "accounts/settings.html")
+# Fin.FS.19.05.2026
