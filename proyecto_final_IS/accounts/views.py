@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404
 
 # Create your views here.
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 #from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -16,15 +16,30 @@ def login_view(request):
 
     if request.method == "POST":
 
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "success": False,
+                "message": "La solicitud no tiene un formato válido."
+            }, status=400)
 
         email = data.get("email")
         password = data.get("password")
 
-        user = authenticate(request, email=email, password=password)
+        if not email or not password:
+            return JsonResponse({
+                "success": False,
+                "message": "Correo y contraseña son obligatorios."
+            }, status=400)
+
+        user = authenticate(
+            request,
+            email=email,
+            password=password
+        )
 
         if user is not None:
-
             login(request, user)
 
             return JsonResponse({
@@ -33,34 +48,73 @@ def login_view(request):
 
         return JsonResponse({
             "success": False,
-            "message": "Usuario o contraseña incorrectos"
+            "message": "Usuario o contraseña incorrectos."
+        }, status=401)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Método no permitido."
+    }, status=405)
+
+
+#=============================================
+
+@login_required
+def logout_view(request):
+    logout(request)
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({
+            "success": True
         })
+
+    return redirect("/login/")
+
+#=============================================
     
 def signup_view(request):
     if request.method == "GET":
         return render(request, "accounts/signup.html")
 
     if request.method == "POST":
-        data = json.loads(request.body)
-        username = data.get("username")
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "success": False,
+                "message": "La solicitud no tiene un formato válido."
+            }, status=400)
+
         email = data.get("email")
         password = data.get("password")
-
         nombre = data.get("nombre_pila")
         ap_paterno = data.get("apellido_paterno")
         ap_materno = data.get("apellido_materno")
-        rol = data.get("role", "student") # Usamos rol por defecto
-        
+        numero_cuenta = data.get("numero_cuenta")
+        rol = data.get("role", "student")
+
+        if not email or not password or not nombre or not ap_paterno or not ap_materno:
+            return JsonResponse({
+                "success": False,
+                "message": "Todos los campos personales son obligatorios."
+            }, status=400)
+
+        if rol == "student" and not numero_cuenta:
+            return JsonResponse({
+                "success": False,
+                "message": "El número de cuenta es obligatorio para estudiantes."
+            }, status=400)
 
         if CustomUser.objects.filter(email=email).exists():
             return JsonResponse({
                 "success": False,
                 "message": "El correo ya está registrado."
-            })
+            }, status=400)
         
         try:
             with transaction.atomic():
-                # Creamos el usuario ya usando la separación de su nombre
+                # Creamos el usuario usando el correo como identificador.
                 user = CustomUser.objects.create_user(
                     email=email,
                     password=password,
@@ -69,17 +123,20 @@ def signup_view(request):
                     apellido_materno=ap_materno
                 )
 
-                #Creamos el perfil del usuario con el rol correspondiente
-                perfil = Profile.objects.create(user=user, role=rol)
+                # Creamos el perfil del usuario con el rol correspondiente.
+                perfil = Profile.objects.create(
+                    user=user,
+                    role=rol
+                )
 
-                # Lo integramos a las tablas hijas
-                # Cambie student por estudiante y teacher por profesor 
-                # para que coincida con el rol
+                # Si el usuario se registra como estudiante, también creamos su registro de alumno.
                 if rol == "student":
                     Alumno.objects.create(
                         perfil=perfil,
-                        numero_cuenta=data.get("numero_cuenta")
+                        numero_cuenta=numero_cuenta
                     )
+
+                # Dejamos este bloque listo por si después se habilita registro de profesores.
                 elif rol == "teacher":
                     Profesor.objects.create(
                         perfil=perfil,
@@ -88,11 +145,22 @@ def signup_view(request):
                         grado_academico=data.get("grado")
                     )
 
-            login(request, user)
-            return JsonResponse({"success": True})
+            return JsonResponse({
+                "success": True
+            })
             
         except Exception as e:
-            return JsonResponse({"success": False, "message": str(e)})
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=400)
+
+    return JsonResponse({
+        "success": False,
+        "message": "Método no permitido."
+    }, status=405)
+
+#===========================================
 
 """
 

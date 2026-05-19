@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clase: Inglés B2</title>
+    <title>Clase: {{ course.title }}</title>
     <link rel="stylesheet" href="{% static 'course.css' %}">
 </head>
 <body>
@@ -12,16 +12,24 @@
         <aside class="sidebar-card">
             <div class="user-profile">
                 <div class="profile-avatar">👤</div>
-                <h3>{{ user.username }}</h3>
+                <h3>{{ user.nombre_pila }}</h3>
                 <p>Estudiante</p>
             </div>
+
             <nav class="nav-menu">
-                <a href="/dashboard" class="nav-item">🏠 Inicio</a>
-                <a href="#" class="nav-item active">📚 Inglés B2</a>
+                <a href="/dashboard/" class="nav-item">🏠 Inicio</a>
+                <a href="#" class="nav-item active">📚 {{ course.title }}</a>
                 <a href="#" class="nav-item">📅 Calendario</a>
                 <a href="#" class="nav-item">📝 Tareas</a>
             </nav>
-            <button class="btn logout-btn" onclick="logout()">Volver</button>
+
+            <button class="btn logout-btn" onclick="goBackToDashboard()">
+                Volver
+            </button>
+
+            <button class="btn logout-btn" onclick="logout()">
+                Cerrar sesión
+            </button>
         </aside>
 
         <!-- Main Course Content -->
@@ -29,10 +37,13 @@
             <!-- Course Banner -->
             <section class="course-banner">
                 <div class="banner-content">
-                    <h1>Inglés de Negocios B2</h1>
-                    <p>Prof. Alejandro García • Sección 04</p>
+                    <h1>{{ course.title }}</h1>
+                    <p>Curso de {{ course.language }}</p>
                 </div>
-                <div class="course-code">Código: <span>XJ82-L9</span></div>
+
+                <div class="course-code">
+                    Código: <span>{{ course.id }}</span>
+                </div>
             </section>
 
             <div class="classroom-grid">
@@ -49,17 +60,23 @@
                         <div class="post-header">
                             <div class="mini-avatar teacher">👨‍🏫</div>
                             <div class="post-meta">
-                                <strong>Prof. Alejandro García</strong>
-                                <span>Publicado a las 10:30 AM</span>
+                                <strong>Profesor del curso</strong>
+                                <span>Publicado recientemente</span>
                             </div>
                         </div>
+
                         <div class="post-body">
-                            <p>Hola a todos. He subido el material para la sesión de "Financial Vocabulary". Por favor, revísenlo antes de la clase de mañana.</p>
+                            <p>
+                                Aquí aparecerán los materiales publicados para este curso.
+                                Por ahora estamos dejando preparada la pantalla para conectarla
+                                después con el caso de uso de materiales.
+                            </p>
+
                             <div class="attachment-item">
                                 <span class="file-icon">📄</span>
                                 <div class="file-info">
-                                    <p>Business_Vocab_Unit3.pdf</p>
-                                    <span>PDF • 2.4 MB</span>
+                                    <p>Material de ejemplo.pdf</p>
+                                    <span>PDF • Archivo de prueba</span>
                                 </div>
                             </div>
                         </div>
@@ -70,11 +87,14 @@
                         <div class="post-header">
                             <div class="mini-avatar assignment">📝</div>
                             <div class="post-meta">
-                                <strong>Nueva Tarea: Case Study Analysis</strong>
-                                <span>Vence mañana, 23:59</span>
+                                <strong>Actividades del curso</strong>
+                                <span>Sin entregas pendientes por ahora</span>
                             </div>
                         </div>
-                        <button class="btn-sm outline">Ver instrucciones</button>
+
+                        <button class="btn-sm outline">
+                            Ver instrucciones
+                        </button>
                     </div>
                 </div>
 
@@ -82,21 +102,29 @@
                 <div class="upcoming-column">
                     <div class="upcoming-card">
                         <h4>Próximas entregas</h4>
+
                         <ul class="task-list">
                             <li>
-                                <p><strong>Mañana</strong></p>
-                                <span>23:59 - Case Study</span>
-                            </li>
-                            <li>
-                                <p><strong>Viernes</strong></p>
-                                <span>18:00 - Quiz Semanal</span>
+                                <p><strong>Sin fecha asignada</strong></p>
+                                <span>Cuando existan tareas, aparecerán aquí.</span>
                             </li>
                         </ul>
+
                         <a href="#" class="view-all">Ver todo</a>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+<script>
+function goBackToDashboard() {
+    window.location.href = "/dashboard/";
+}
+
+function logout() {
+    window.location.href = "/logout/";
+}
+</script>
 </body>
 </html>

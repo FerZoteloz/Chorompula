@@ -59,11 +59,18 @@ class Alumno(models.Model):
     perfil = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
     numero_cuenta = models.IntegerField(unique=True)
 
+    def __str__(self):
+        return f"{self.perfil.user.email} - {self.numero_cuenta}"
+
+
 class Profesor(models.Model):
     perfil = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
     numero_empleado = models.IntegerField(unique=True)
     especialidad = models.CharField(max_length=50)
     grado_academico = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.perfil.user.email} - {self.especialidad}"
 
     
 
@@ -114,4 +121,4 @@ class UsuarioCurso(models.Model):
         unique_together = ('usuario', 'curso', 'rol_en_curso')
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.curso.title} - {self.rol_en_curso}"
+        return f"{self.usuario.email} - {self.curso.title} - {self.rol_en_curso}"
