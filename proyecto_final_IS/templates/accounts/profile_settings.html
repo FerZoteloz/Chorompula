@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi perfil</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <aside class="sidebar-card">
+        <div class="user-profile">
+            <div class="profile-avatar">
+                {% if profile.avatar_image %}
+                    <img src="{{ profile.avatar_image.url }}" alt="Foto de perfil">
+                {% else %}
+                    {{ profile.avatar_emoji }}
+                {% endif %}
+            </div>
+            <h3>{{ user.nombre_pila }}</h3>
+            <p>{{ profile.get_role_display }}</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Volver al dashboard</a>
+            <a href="{% url 'logout' %}" class="nav-item">Cerrar sesión</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h2>Personalizar perfil</h2>
+        </header>
+
+        <div class="course-card">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h3>Subir foto de perfil</h3>
+                <p>Puedes subir una imagen desde tu computadora.</p>
+
+                <input type="file" name="avatar_image" accept="image/*">
+
+                <h3>O elegir un avatar</h3>
+                <p>Elige uno de estos emojis para tu perfil.</p>
+
+                <div class="avatar-options">
+                    {% for emoji in emoji_options %}
+                        <label class="avatar-option">
+                            <input
+                                type="radio"
+                                name="avatar_emoji"
+                                value="{{ emoji }}"
+                                {% if profile.avatar_emoji == emoji %}checked{% endif %}
+                            >
+                            <span>{{ emoji }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn-sm">
+                    Guardar cambios
+                </button>
+            </form>
+        </div>
+    </main>
+
+</div>
+</body>
+</html>

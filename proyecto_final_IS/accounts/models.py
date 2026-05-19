@@ -1,6 +1,7 @@
 from django.db import models
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+
 
 # Create your models here.
 
@@ -19,8 +20,9 @@ class UsuarioManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
+
 class CustomUser(AbstractUser):
-    username = None # Eliminamos el username
+    username = None  # Eliminamos el username
     email = models.EmailField('correo electrónico', unique=True)
 
     # Tenemos que hacer que coincidan con la DB propuesta originalmente
@@ -51,9 +53,22 @@ class Profile(models.Model):
         choices=ROLE_CHOICES
     )
 
+    # Ini.FS.19.05.2026
+    avatar_emoji = models.CharField(
+        max_length=10,
+        blank=True,
+        default="👤"
+    )
+
+    avatar_image = models.ImageField(
+        upload_to="avatars/",
+        blank=True,
+        null=True
+    )
+
     def __str__(self):
         return f"{self.user.email} - {self.role}"
-    
+
 
 class Alumno(models.Model):
     perfil = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
@@ -72,10 +87,8 @@ class Profesor(models.Model):
     def __str__(self):
         return f"{self.perfil.user.email} - {self.especialidad}"
 
-    
 
 class Course(models.Model):
-
     title = models.CharField(max_length=100)
 
     language = models.CharField(max_length=50)
@@ -93,7 +106,8 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class UsuarioCurso(models.Model):
     ROL_CURSO_CHOICES = (
         ('teacher', 'Profesor'),
@@ -120,5 +134,7 @@ class UsuarioCurso(models.Model):
     class Meta:
         unique_together = ('usuario', 'curso', 'rol_en_curso')
 
+    # Fin.FS.19.05.2026
     def __str__(self):
         return f"{self.usuario.email} - {self.curso.title} - {self.rol_en_curso}"
+

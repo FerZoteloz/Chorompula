@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Base de datos local
+db.sqlite3
+proyecto_final_IS/db.sqlite3
+
+# Archivos subidos localmente
+media/
+proyecto_final_IS/media/
+
+# PyCharm
+.idea/

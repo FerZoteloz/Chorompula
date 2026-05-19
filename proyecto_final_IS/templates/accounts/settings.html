@@ -1,0 +1,106 @@
+<!-- < Ini.FS.19.05.2026-->
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+
+<div class="settings-page">
+
+    <!-- Candados del fondo -->
+    <div class="locks-background">
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+    </div>
+
+    <main class="settings-container">
+
+        <div class="settings-icon">⚙️</div>
+
+        <h1>Configuración</h1>
+
+        <!-- Tarjeta del usuario -->
+        <section class="profile-header">
+            <div class="profile-avatar">
+                {% if profile.avatar_image %}
+                    <img src="{{ profile.avatar_image.url }}" alt="Avatar">
+                {% else %}
+                    <span>{{ profile.avatar_emoji|default:"👤" }}</span>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h2>{{ request.user.nombre_pila }} {{ request.user.apellido_paterno }} {{ request.user.apellido_materno }}</h2>
+                <p>{{ profile.get_role_display }}</p>
+            </div>
+
+            <div class="status-badge">
+                <span></span>
+                Cuenta activa
+            </div>
+        </section>
+
+        <!-- Grid de opciones -->
+        <section class="settings-grid">
+
+            <a href="#" class="settings-card">
+                <div class="card-emoji">👤</div>
+                <h3>Mi cuenta</h3>
+                <p>Información general de la cuenta</p>
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{% url 'profile_settings' %}" class="settings-card">
+                <div class="card-emoji">🖼️</div>
+                <h3>Foto o avatar</h3>
+                <p>Elige una imagen o un emoji</p>
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="#" class="settings-card">
+                <div class="card-emoji">📝</div>
+                <h3>Datos personales</h3>
+                <p>Nombre, correo y datos básicos</p>
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="#" class="settings-card">
+                <div class="card-emoji">🔐</div>
+                <h3>Seguridad</h3>
+                <p>Contraseña y acceso seguro</p>
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="#" class="settings-card">
+                <div class="card-emoji">⚙️</div>
+                <h3>Preferencias</h3>
+                <p>Ajustes y personalización</p>
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{% url 'logout' %}" class="settings-card logout-card">
+                <div class="card-emoji">🚪</div>
+                <h3>Cerrar sesión</h3>
+                <p>Salir de forma segura</p>
+                <span class="arrow">›</span>
+            </a>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
+<!-- < Fin.FS.19.05.2026-->
