@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Configuración</title>
-    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'settings.css' %}">
 </head>
 <body>
 
@@ -25,6 +25,9 @@
 
     <main class="settings-container">
 
+        <a href="{% url 'dashboard' %}" class="back-button">
+    ← Volver al menú principal
+    </a>
         <div class="settings-icon">⚙️</div>
 
         <h1>Configuración</h1>
