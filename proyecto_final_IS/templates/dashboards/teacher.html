@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Dashboard Profesor</title>
     <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
 <body>
@@ -19,21 +19,18 @@
                     {% elif user.profile.avatar_emoji %}
                         {{ user.profile.avatar_emoji }}
                     {% else %}
-                        👤
+                        👨‍🏫
                     {% endif %}
                 </div>
             </a>
 
             <h3>{{ user.nombre_pila }}</h3>
-            <p>Estudiante</p>
+            <p>Profesor</p>
         </div>
 
         <nav class="nav-menu">
-            <a href="{% url 'dashboard' %}" class="nav-item active">Mis Cursos</a>
-            <a href="#" class="nav-item">Pendientes</a>
-            <a href="#" class="nav-item">Recursos</a>
-            <a href="#" class="nav-item">Más cursos...</a>
-            <a href="{% url 'inscribirse_codigo' %}" class="nav-item">Inscribirme con código</a>
+            <a href="{% url 'dashboard' %}" class="nav-item active">Mis cursos</a>
+            <a href="{% url 'crear_curso' %}" class="nav-item">Crear curso</a>
             <a href="{% url 'settings' %}" class="nav-item">Configuración</a>
         </nav>
 
@@ -42,11 +39,11 @@
 
     <main class="main-content">
         <header class="content-header">
-            <h2>Mis Cursos de Idiomas</h2>
+            <h2>Panel del Profesor</h2>
 
             <div class="stats-row">
                 <div class="stat-badge">Cursos: {{ courses|length }}</div>
-                <div class="stat-badge">Rol: Estudiante</div>
+                <div class="stat-badge">Rol: Profesor</div>
             </div>
         </header>
 
@@ -61,38 +58,21 @@
                     <div class="course-info">
                         <h4>{{ course.title }}</h4>
 
-                        <p>
-                            Semana {{ course.week }}
-                            •
-                            {{ course.progress }}% completado
-                        </p>
+                        <p>Idioma: {{ course.language }}</p>
 
-                        <div class="progress-bar-container">
-                            <div
-                                class="progress-fill"
-                                style="width: {{ course.progress }}%;"
-                            ></div>
-                        </div>
+                        <p>
+                            Código de inscripción:
+                            <strong>{{ course.codigo_inscripcion }}</strong>
+                        </p>
                     </div>
 
                     <a href="{% url 'course_detail' course.id %}" class="btn-sm course-action-btn">
-                        Continuar
+                        Ver curso
                     </a>
-
-                    <form
-                         method="POST"
-                         action="{% url 'salir_curso' course.id %}"
-                         onsubmit="return confirmarSalida('{{ course.title }}');"
-                    >
-                        {% csrf_token %}
-                        <button type="submit" class="btn-sm leave-course-btn">
-                         Salir del curso
-                     </button>
-                </form>
                 </div>
 
             {% empty %}
-                <p>Aún no tienes cursos registrados.</p>
+                <p>Aún no tienes cursos creados o asignados.</p>
             {% endfor %}
         </div>
     </main>
@@ -102,10 +82,6 @@
 <script>
 function logout() {
     window.location.href = "/logout/";
-}
-
-function confirmarSalida(nombreCurso) {
-    return confirm("¿Seguro que quieres salir del curso: " + nombreCurso + "?");
 }
 </script>
 </body>

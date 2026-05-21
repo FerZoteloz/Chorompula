@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Curso</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Crear curso</h2>
+            <p>Registrar un nuevo curso con código de inscripción</p>
+        </div>
+
+        {% if error %}
+            <p style="color:#ffb3b3; text-align:center;">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" name="nombre" required>
+                    <label>Nombre del curso</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" name="idioma" required>
+                    <label>Idioma</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" name="flag" value="📘" required>
+                    <label>Emoji o bandera</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                Crear curso
+            </button>
+        </form>
+
+        <a href="{% url 'dashboard' %}" class="btn other-one-btn">
+            Volver
+        </a>
+    </div>
+</div>
+</body>
+</html>

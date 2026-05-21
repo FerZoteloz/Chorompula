@@ -1,6 +1,8 @@
 from django.db import models
 # from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+import random
+import string
 
 
 # Create your models here.
@@ -99,10 +101,35 @@ class Course(models.Model):
 
     progress = models.IntegerField(default=0)
 
+    codigo_inscripcion = models.CharField(
+        max_length=12,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
     student = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE
     )
+
+    def generar_codigo(self):
+        letras = self.language[:3].upper() if self.language else "CUR"
+        aleatorio = ''.join(
+            random.choices(string.ascii_uppercase + string.digits, k=5)
+        )
+        return f"{letras}-{aleatorio}"
+
+    def save(self, *args, **kwargs):
+        if not self.codigo_inscripcion:
+            codigo = self.generar_codigo()
+
+            while Course.objects.filter(codigo_inscripcion=codigo).exists():
+                codigo = self.generar_codigo()
+
+            self.codigo_inscripcion = codigo
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -137,4 +164,24 @@ class UsuarioCurso(models.Model):
     # Fin.FS.19.05.2026
     def __str__(self):
         return f"{self.usuario.email} - {self.curso.title} - {self.rol_en_curso}"
+
+
+class CoursePost(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="posts"
+    )
+
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE
+    )
+
+    content = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Publicación de {self.author.email} en {self.course.title}"
 

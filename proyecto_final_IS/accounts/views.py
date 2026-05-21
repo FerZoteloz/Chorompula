@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
-from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor
+from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost
 import json
 
 
@@ -190,15 +190,24 @@ def signup_view(request):
 def dashboard_view(request):
     role = request.user.profile.role
 
-    courses = Course.objects.filter(
-        student=request.user
-    )
+    if role == "student":
+        courses = Course.objects.filter(
+            usuariocurso__usuario=request.user,
+            usuariocurso__rol_en_curso="student"
+        ).distinct()
+
+    elif role == "teacher":
+        courses = Course.objects.filter(
+            usuariocurso__usuario=request.user,
+            usuariocurso__rol_en_curso="teacher"
+        ).distinct()
+
+    else:
+        courses = Course.objects.all()
 
     context = {
         "courses": courses
     }
-
-    role = request.user.profile.role
 
     if role == "admin":
         return render(request, "admin_usuarios/lista_usuarios.html", context)
@@ -207,11 +216,7 @@ def dashboard_view(request):
         return render(request, "dashboards/teacher.html", context)
 
     else:
-        return render(
-            request,
-            "dashboards/student.html",
-            context
-        )
+        return render(request, "dashboards/student.html", context)
 
 
 @login_required
@@ -221,11 +226,42 @@ def course_detail_view(request, course_id):
         id=course_id
     )
 
+    role = request.user.profile.role
+
+    es_profesor_del_curso = UsuarioCurso.objects.filter(
+        usuario=request.user,
+        curso=course,
+        rol_en_curso="teacher"
+    ).exists()
+
+    puede_publicar = role == "admin" or es_profesor_del_curso
+
+    if request.method == "POST":
+        if not puede_publicar:
+            return redirect("course_detail", course_id=course.id)
+
+        content = request.POST.get("content", "").strip()
+
+        if content:
+            CoursePost.objects.create(
+                course=course,
+                author=request.user,
+                content=content
+            )
+
+        return redirect("course_detail", course_id=course.id)
+
+    posts = CoursePost.objects.filter(
+        course=course
+    ).order_by("-created_at")
+
     return render(
         request,
         "dashboards/courses/course.html",
         {
-            "course": course
+            "course": course,
+            "posts": posts,
+            "puede_publicar": puede_publicar
         }
     )
 
@@ -314,29 +350,39 @@ def editar_usuario_view(request, profile_id):
 
 @login_required
 def crear_curso_view(request):
-    if request.user.profile.role != "admin":
-        return redirect("/dashboard/")
+    if request.user.profile.role not in ["admin", "teacher"]:
+        return redirect("dashboard")
 
     if request.method == "GET":
-        return render(request, "dashboards/crear_curso.html")
+        return render(request, "admin_usuarios/crear_curso.html")
 
     if request.method == "POST":
         title = request.POST.get("nombre")
         language = request.POST.get("idioma")
-        description = request.POST.get("descripcion")
-        status = request.POST.get("estado")
+        flag = request.POST.get("flag", "📘")
 
-        Course.objects.create(
+        if not title or not language:
+            return render(request, "dashboards/crear_curso.html", {
+                "error": "El nombre y el idioma del curso son obligatorios."
+            })
+
+        curso = Course.objects.create(
             title=title,
             language=language,
-            description=description,
-            status=status,
-            creator=request.user,
-            flag="📘"
+            flag=flag,
+            week=1,
+            progress=0,
+            student=request.user
         )
 
-        return redirect("/dashboard/")
+        if request.user.profile.role == "teacher":
+            UsuarioCurso.objects.get_or_create(
+                usuario=request.user,
+                curso=curso,
+                rol_en_curso="teacher"
+            )
 
+        return redirect("dashboard")
 
 @login_required
 def detalle_curso_view(request, course_id):
@@ -442,3 +488,63 @@ def profile_settings_view(request):
 def settings_view(request):
     return render(request, "accounts/settings.html")
 # Fin.FS.19.05.2026
+
+@login_required
+def inscribirse_codigo_view(request):
+    if request.user.profile.role != "student":
+        return redirect("dashboard")
+
+    mensaje = None
+    error = None
+    curso = None
+
+    if request.method == "POST":
+        codigo = request.POST.get("codigo_inscripcion", "").strip().upper()
+
+        if not codigo:
+            error = "Debes ingresar un código de inscripción."
+        else:
+            curso = Course.objects.filter(codigo_inscripcion=codigo).first()
+
+            if not curso:
+                error = "El código ingresado no existe."
+            else:
+                relacion_existente = UsuarioCurso.objects.filter(
+                    usuario=request.user,
+                    curso=curso,
+                    rol_en_curso="student"
+                ).exists()
+
+                if relacion_existente:
+                    mensaje = "Ya estás inscrito en este curso."
+                else:
+                    UsuarioCurso.objects.create(
+                        usuario=request.user,
+                        curso=curso,
+                        rol_en_curso="student"
+                    )
+
+                    mensaje = f"Te inscribiste correctamente al curso: {curso.title}"
+
+    return render(request, "dashboards/inscripcion_codigo.html", {
+        "mensaje": mensaje,
+        "error": error,
+        "curso": curso
+    })
+
+@login_required
+def salir_curso_view(request, course_id):
+    if request.user.profile.role != "student":
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        relacion = UsuarioCurso.objects.filter(
+            usuario=request.user,
+            curso_id=course_id,
+            rol_en_curso="student"
+        ).first()
+
+        if relacion:
+            relacion.delete()
+
+    return redirect("dashboard")
