@@ -33,7 +33,9 @@ from accounts.views import (
 # Ini.FS.19.05.2026
     profile_settings_view,
     settings_view,
+    salir_curso_view,
 # Fin.FS.19.05.2026
+    inscribirse_codigo_view,
 )
 
 urlpatterns = [
@@ -56,6 +58,8 @@ urlpatterns = [
 # Ini.FS.19.05.2026
     path('perfil/', profile_settings_view, name='profile_settings'),
     path('configuracion/', settings_view, name='settings'),
+    path('inscribirse/', inscribirse_codigo_view, name='inscribirse_codigo'),
+    path('curso/<int:course_id>/salir/', salir_curso_view, name='salir_curso'),
 # Fin.FS.19.05.2026
     path(
         'course/<int:course_id>/',

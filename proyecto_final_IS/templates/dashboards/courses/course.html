@@ -13,7 +13,7 @@
             <div class="user-profile">
                 <div class="profile-avatar">👤</div>
                 <h3>{{ user.nombre_pila }}</h3>
-                <p>Estudiante</p>
+                <p>{{ user.profile.get_role_display }}</p>
             </div>
 
             <nav class="nav-menu">
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="course-code">
-                    Código: <span>{{ course.id }}</span>
+                    Código: <span>{{ course.codigo_inscripcion }}</span>
                 </div>
             </section>
 
@@ -50,11 +50,43 @@
                 <!-- Left Column: Stream / Announcements -->
                 <div class="stream-column">
                     <!-- Share something box -->
-                    <div class="announcement-card share-box">
-                        <div class="mini-avatar">👤</div>
-                        <input type="text" placeholder="Anuncia algo a tu clase...">
-                    </div>
+                {% if puede_publicar %}
+                    <form method="POST" class="announcement-card share-box">
+                        {% csrf_token %}
+                        <div class="mini-avatar">👨‍🏫</div>
+                        <input
+                        type="text"
+                        name="content"
+                        placeholder="Anuncia algo a tu clase..."
+                        required
+                    >
 
+                    <button type="submit" class="btn-sm">
+                        Publicar
+                    </button>
+                </form>
+            {% endif %}
+
+            {% for post in posts %}
+                 <div class="announcement-card">
+                    <div class="post-header">
+                    <div class="mini-avatar teacher">👨‍🏫</div>
+                    <div class="post-meta">
+                    <strong>{{ post.author.nombre_pila }} {{ post.author.apellido_paterno }}</strong>
+                <span>{{ post.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+            <div class="post-body">
+                <p>{{ post.content }}</p>
+        </div>
+    </div>
+{% empty %}
+    <div class="announcement-card">
+        <div class="post-body">
+            <p>Aún no hay publicaciones en este curso.</p>
+        </div>
+    </div>
+{% endfor %}
                     <!-- Material Post -->
                     <div class="announcement-card">
                         <div class="post-header">

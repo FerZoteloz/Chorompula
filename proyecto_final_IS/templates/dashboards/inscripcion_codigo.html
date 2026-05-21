@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscribirse a curso</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+
+<div class="login-container">
+    <div class="login-card">
+
+        <div class="login-header">
+            <h2>Inscribirse a un curso</h2>
+            <p>Ingresa el código que te proporcionó tu profesor o administrador.</p>
+        </div>
+
+        {% if error %}
+            <p style="color:#ffb3b3; text-align:center; margin-bottom:16px;">
+                {{ error }}
+            </p>
+        {% endif %}
+
+        {% if mensaje %}
+            <p style="color:#86efac; text-align:center; margin-bottom:16px;">
+                {{ mensaje }}
+            </p>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        name="codigo_inscripcion"
+                        required
+                        placeholder="Código de inscripción"
+                    >
+                    <label>Código de inscripción</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn login-btn">
+                Inscribirme
+            </button>
+        </form>
+
+        <a href="{% url 'dashboard' %}" class="btn other-one-btn">
+            Volver al dashboard
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>
