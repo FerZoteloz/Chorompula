@@ -50,7 +50,17 @@
                 <!-- Left Column: Stream / Announcements -->
                 <div class="stream-column">
                     <!-- Share something box -->
-                {% if puede_publicar %}
+                     <!-- Agregamos publicar materiales (como pdf's) -->
+                    {% if request.user.profile.role == 'teacher' %}
+                    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+                        <a href="{% url 'subir_material' course.id %}" 
+                        style="background: #00c6ff; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: background 0.3s;">
+                            + Subir Material (PDF/Doc)
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if puede_publicar %}
                     <form method="POST" class="announcement-card share-box">
                         {% csrf_token %}
                         <div class="mini-avatar">👨‍🏫</div>
@@ -67,52 +77,57 @@
                 </form>
             {% endif %}
 
-            {% for post in posts %}
-                 <div class="announcement-card">
-                    <div class="post-header">
-                    <div class="mini-avatar teacher">👨‍🏫</div>
-                    <div class="post-meta">
-                    <strong>{{ post.author.nombre_pila }} {{ post.author.apellido_paterno }}</strong>
-                <span>{{ post.created_at|date:"d/m/Y H:i" }}</span>
-                </div>
-            </div>
-            <div class="post-body">
-                <p>{{ post.content }}</p>
-        </div>
-    </div>
-{% empty %}
-    <div class="announcement-card">
-        <div class="post-body">
-            <p>Aún no hay publicaciones en este curso.</p>
-        </div>
-    </div>
-{% endfor %}
-                    <!-- Material Post -->
+            <!-- Agregamos esto para que aparezcan en orden -->
+            {% for item in feed_ordenado %}
+                
+                {% if item.titulo %}
                     <div class="announcement-card">
                         <div class="post-header">
                             <div class="mini-avatar teacher">👨‍🏫</div>
                             <div class="post-meta">
-                                <strong>Profesor del curso</strong>
-                                <span>Publicado recientemente</span>
+                                <strong>Material publicado</strong>
+                                <span>{{ item.fecha_subida|date:"d/m/Y H:i" }}</span> 
                             </div>
                         </div>
 
                         <div class="post-body">
-                            <p>
-                                Aquí aparecerán los materiales publicados para este curso.
-                                Por ahora estamos dejando preparada la pantalla para conectarla
-                                después con el caso de uso de materiales.
-                            </p>
+                            <p style="font-size: 1.1rem; margin-bottom: 10px;">{{ item.titulo }}</p>
 
-                            <div class="attachment-item">
-                                <span class="file-icon">📄</span>
-                                <div class="file-info">
-                                    <p>Material de ejemplo.pdf</p>
-                                    <span>PDF • Archivo de prueba</span>
+                            <a href="{{ item.archivo.url }}" target="_blank" style="text-decoration: none; color: inherit;">
+                                <div class="attachment-item" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.2); transition: background 0.3s;">
+                                    <span class="file-icon" style="font-size: 1.8rem;">📄</span>
+                                    <div class="file-info">
+                                        <p style="margin: 0; font-weight: bold; color: #00c6ff;">Ver archivo adjunto</p>
+                                        <span style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">Haz clic para abrir el documento</span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
+
+                {% else %}
+                    <div class="announcement-card">
+                        <div class="post-header">
+                            <div class="mini-avatar teacher">👨‍🏫</div>
+                            <div class="post-meta">
+                                <strong>{{ item.author.nombre_pila }} {{ item.author.apellido_paterno }}</strong>
+                                <span>{{ item.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="post-body">
+                            <p>{{ item.content }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+            {% empty %}
+                <div class="announcement-card">
+                    <div class="post-body">
+                        <p>Aún no hay publicaciones ni materiales en este curso.</p>
+                    </div>
+                </div>
+            {% endfor %}
+            <!-- Aqui acabalo que agregamos -->
 
                     <!-- Assignment Post -->
                     <div class="announcement-card">
