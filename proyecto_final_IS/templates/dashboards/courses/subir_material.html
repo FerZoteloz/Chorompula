@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Material - {{ curso.title }}</title>
+    <link rel="stylesheet" href="{% static 'course.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Ajuste de la tarjeta */
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Estilo de la tarjeta */
+        .upload-card {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .upload-header p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+        }
+
+        /* Títulos */
+        .form-group label {
+            color: white; 
+            display: block; 
+            margin-bottom: 10px; 
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Inputs */
+        .login-form input[type="text"],
+        .login-form input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .login-form input[type="text"]:focus {
+            outline: none;
+            border-color: #00c6ff;
+        }
+        
+        .login-form input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Ponemos colores llamativos para que se vea como el Botón Principal */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        /* Botón Secundario */
+        .btn-secondary {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .button-group {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="upload-container">
+        <div class="upload-card">
+            <div class="upload-header">
+                <h2>Subir Material</h2>
+                <p>Curso: {{ curso.title }}</p>
+            </div>
+
+            <form id="materialForm" enctype="multipart/form-data" class="login-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_titulo">Título del Material</label>
+                    {{ form.titulo }}
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="id_archivo">Seleccionar Archivo (PDF/Doc/Txt)</label>
+                    {{ form.archivo }}
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        <span class="btn-text">Subir Archivo</span>
+                    </button>
+                    
+                    <a href="{% url 'course_detail' curso.id %}" class="btn-secondary">
+                        Volver al Curso
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.getElementById("materialForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const btnText = this.querySelector(".btn-text");
+    if(btnText) btnText.textContent = "Subiendo archivo...";
+
+    try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const response = await fetch(window.location.href, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        const data = await response.json();
+
+        if(data.success) {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#00c6ff',
+                background: '#2a2f4a',
+                color: 'white'
+            }).then(() => {
+                window.location.href = "{% url 'course_detail' curso.id %}";
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+                confirmButtonColor: '#ff416c',
+                background: '#2a2f4a',
+                color: 'white'
+            });
+            if(btnText) btnText.textContent = "Subir Archivo";
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error de red',
+            text: 'No se pudo conectar con el servidor.',
+            icon: 'warning',
+            confirmButtonColor: '#ff416c',
+            background: '#2a2f4a',
+            color: 'white'
+        });
+        if(btnText) btnText.textContent = "Subir Archivo";
+    }
+});
+</script>
+</body>
+</html>
