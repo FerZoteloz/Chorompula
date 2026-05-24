@@ -8,6 +8,11 @@ from django.http import JsonResponse
 from django.db import transaction
 from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost
 import json
+# Nuevas importaciones para subir materiales
+from django.contrib import messages
+from accounts.forms import MaterialForm
+from accounts.models import Material
+from itertools import chain
 
 
 def login_view(request):
@@ -255,13 +260,26 @@ def course_detail_view(request, course_id):
         course=course
     ).order_by("-created_at")
 
+    #Obtnemos ahora los materiles
+    materiales = course.materiales.all()
+
+    # Tenemos que unir los anuncios y los materiales
+    feed_combinado = list(chain(posts, materiales))
+
+    feed_ordenado = sorted(
+        feed_combinado, 
+        key=lambda item: getattr(item, 'created_at', getattr(item, 'fecha_subida', None)), 
+        reverse=True
+    )
+
     return render(
         request,
         "dashboards/courses/course.html",
         {
             "course": course,
             "posts": posts,
-            "puede_publicar": puede_publicar
+            "puede_publicar": puede_publicar,
+            "feed_ordenado": feed_ordenado
         }
     )
 
@@ -548,3 +566,39 @@ def salir_curso_view(request, course_id):
             relacion.delete()
 
     return redirect("dashboard")
+
+@login_required
+def subir_material_view(request, course_id):
+    # Tenemos que obtener el curso o arrojamos un error si no existe
+    curso = get_object_or_404(Course, id=course_id)
+    
+    # Validar si el usuario es profesor de ese curso
+    es_profesor_asignado = UsuarioCurso.objects.filter(
+        usuario=request.user,
+        curso=curso,
+        rol_en_curso='teacher'
+    ).exists()
+    
+    if not es_profesor_asignado:
+        # Si se quiere forzar lo regresamos :)
+        return redirect('/dashboard/')
+
+    if request.method == "POST":
+        form = MaterialForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Guardamos
+            material = form.save(commit=False)
+            material.curso = curso # Asignamos el curso actual
+            material.save() # Se guarda en la DB
+            
+            return JsonResponse({"success": True, "message": "El material se subió correctamente"})
+        else:
+            return JsonResponse({"success": False, "message": "Formulario inválido"})
+
+    else:
+        form = MaterialForm()
+
+    return render(request, "dashboards/courses/subir_material.html", {
+        "curso": curso,
+        "form": form
+    })
