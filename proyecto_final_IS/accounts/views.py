@@ -553,3 +553,83 @@ def subir_material_view(request, course_id):
             "course": course
         }
     )
+
+@login_required
+def borradores_view(request):
+
+    borradores = CourseMaterial.objects.filter(
+        uploaded_by=request.user,
+        estado="borrador"
+    )
+
+    return render(
+        request,
+        "dashboards/courses/borradores.html",
+        {
+            "borradores": borradores
+        }
+    )
+
+@login_required
+def editar_borrador_view(request, material_id):
+
+    material = get_object_or_404(
+        CourseMaterial,
+        id=material_id,
+        uploaded_by=request.user
+    )
+
+    if request.method == "GET":
+        return render(
+            request,
+            "dashboards/courses/editar_borrador.html",
+            {
+                "material": material
+            }
+        )
+
+    if request.method == "POST":
+
+        material.title = request.POST.get("title")
+        material.description = request.POST.get("description")
+
+        nuevo_archivo = request.FILES.get("file")
+
+        if nuevo_archivo:
+            material.file = nuevo_archivo
+
+        material.save()
+
+        return redirect("mis_borradores")
+    
+@login_required
+def publicar_borrador_view(request, material_id):
+
+    material = get_object_or_404(
+        CourseMaterial,
+        id=material_id,
+        uploaded_by=request.user
+    )
+
+    if request.method == "POST":
+
+        material.estado = "publicado"
+        material.save()
+
+    return redirect("mis_borradores")
+
+@login_required
+def eliminar_borrador_view(request, material_id):
+
+    material = get_object_or_404(
+        CourseMaterial,
+        id=material_id,
+        uploaded_by=request.user
+    )
+
+    if request.method == "POST":
+
+        material.file.delete(save=False)
+        material.delete()
+
+    return redirect("mis_borradores")

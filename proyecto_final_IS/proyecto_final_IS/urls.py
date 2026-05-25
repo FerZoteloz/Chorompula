@@ -37,6 +37,10 @@ from accounts.views import (
 # Fin.FS.19.05.2026
     inscribirse_codigo_view,
     subir_material_view,
+    borradores_view,
+    editar_borrador_view,
+    publicar_borrador_view,
+    eliminar_borrador_view,
 )
 
 urlpatterns = [
@@ -68,6 +72,10 @@ urlpatterns = [
         name='course_detail'
     ),
     path("course/<int:course_id>/upload-material/", subir_material_view, name="upload_material"),
+    path("mis-borradores/", borradores_view, name="mis_borradores"),
+    path("borrador/<int:material_id>/editar/", editar_borrador_view, name="editar_borrador"),
+    path("borrador/<int:material_id>/publicar/",publicar_borrador_view, name="publicar_borrador"),
+    path("borrador/<int:material_id>/eliminar/", eliminar_borrador_view, name="eliminar_borrador"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

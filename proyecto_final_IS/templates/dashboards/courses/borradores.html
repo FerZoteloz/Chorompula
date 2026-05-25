@@ -1,0 +1,104 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis borradores</title>
+
+    <link rel="stylesheet"
+          href="{% static 'dashboard.css' %}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <h1>📝 Mis borradores</h1>
+
+    {% if borradores %}
+
+        <div class="courses-grid">
+
+            {% for material in borradores %}
+
+            <div class="course-card">
+
+                <div class="course-info">
+
+                    <h3>
+                        {{ material.title }}
+                    </h3>
+
+                    <p>
+                        Curso:
+                        {{ material.course.title }}
+                    </p>
+
+                    <p>
+                        {{ material.description|truncatechars:120 }}
+                    </p>
+
+                    <small>
+                        {{ material.uploaded_at }}
+                    </small>
+
+                    <br><br>
+
+                    <div class="buttons-row">
+
+                        <a
+                            href="{% url 'editar_borrador' material.id %}"
+                            class="btn-sm"
+                        >
+                            ✏️ Editar
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{% url 'publicar_borrador' material.id %}"
+                            style="display:inline;"
+                        >
+                            {% csrf_token %}
+
+                            <button class="btn-sm">
+                                ✅ Publicar
+                            </button>
+
+                        </form>
+
+                        <form
+                            method="POST"
+                            action="{% url 'eliminar_borrador' material.id %}"
+                            style="display:inline;"
+                        >
+                            {% csrf_token %}
+
+                            <button class="btn-sm">
+                                🗑 Eliminar
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <p>
+            No tienes borradores guardados.
+        </p>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

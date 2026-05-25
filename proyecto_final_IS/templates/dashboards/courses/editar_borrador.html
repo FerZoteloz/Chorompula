@@ -1,0 +1,30 @@
+<h2>Editar borrador</h2>
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+    {% csrf_token %}
+
+    <input
+        type="text"
+        name="title"
+        value="{{ material.title }}"
+        required
+    >
+
+    <textarea
+        name="description"
+    >{{ material.description }}</textarea>
+
+    <input
+        type="file"
+        name="file"
+    >
+
+    <button type="submit">
+        Guardar cambios
+    </button>
+
+</form>
