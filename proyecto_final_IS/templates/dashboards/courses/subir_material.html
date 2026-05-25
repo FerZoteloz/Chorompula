@@ -1,27 +1,200 @@
-<h2>Subir material</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir material - {{ course.title }}</title>
+    <link rel="stylesheet" href="{% static 'subir_material.css' %}">
+</head>
+<body>
+    <div class="upload-container">
+        <div class="upload-card">
+            <!-- Botón de volver -->
+            <a href="{% url 'course_detail' course.id %}" class="back-button">
+                ← Volver al curso
+            </a>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+            <!-- Encabezado -->
+            <div class="upload-header">
+                <div class="upload-icon">📤</div>
+                <h2>Subir material</h2>
+                <p class="course-info">Curso: <strong>{{ course.title }}</strong></p>
+                <p class="upload-hint">Comparte archivos, documentos o recursos con tus estudiantes</p>
+            </div>
 
-    <input
-        type="text"
-        name="title"
-        placeholder="Título"
-        required
-    >
+            <!-- Formulario -->
+            <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+                {% csrf_token %}
 
-    <textarea
-        name="description"
-        placeholder="Descripción"
-    ></textarea>
+                <!-- Campo: Título -->
+                <div class="form-group-material">
+                    <div class="input-wrapper-material">
+                        <input
+                            type="text"
+                            name="title"
+                            id="title"
+                            placeholder=" "
+                            required
+                            autocomplete="off"
+                        >
+                        <label for="title">Título del material *</label>
+                        <div class="focus-border"></div>
+                    </div>
+                    <small class="input-hint">Ej: "Guía de estudio unidad 1", "Presentación clase 3", etc.</small>
+                </div>
 
-    <input
-        type="file"
-        name="file"
-        required
-    >
+                <!-- Campo: Descripción -->
+                <div class="form-group-material">
+                    <div class="input-wrapper-material textarea-wrapper">
+                        <textarea
+                            name="description"
+                            id="description"
+                            placeholder=" "
+                            rows="4"
+                        ></textarea>
+                        <label for="description">Descripción (opcional)</label>
+                        <div class="focus-border"></div>
+                    </div>
+                    <small class="input-hint">Describe brevemente el contenido del archivo</small>
+                </div>
 
-    <button type="submit">
-        Subir material
-    </button>
-</form>
+                <!-- Campo: Archivo -->
+                <div class="form-group-material file-upload-group">
+                    <label class="file-label" for="file">
+                        <div class="file-dropzone" id="fileDropzone">
+                            <div class="file-icon">📁</div>
+                            <p class="file-message">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                            <p class="file-hint">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG (Máx. 100MB)</p>
+                            <input
+                                type="file"
+                                name="file"
+                                id="file"
+                                required
+                                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png"
+                            >
+                        </div>
+                    </label>
+                    <div class="file-info-preview" id="filePreview" style="display: none;">
+                        <span class="preview-icon">📄</span>
+                        <span class="preview-name" id="fileName"></span>
+                        <button type="button" class="remove-file" id="removeFile">✕</button>
+                    </div>
+                </div>
+
+                <!-- Barra de progreso (opcional) -->
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <span class="progress-text" id="progressText">0%</span>
+                </div>
+
+                <!-- Botón de envío -->
+                <button type="submit" class="submit-material-btn" id="submitBtn">
+                    <span class="btn-text">📤 Subir material</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <!-- Mensajes de error adicionales -->
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Previsualización del archivo seleccionado
+        const fileInput = document.getElementById('file');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+        const fileDropzone = document.getElementById('fileDropzone');
+        const dropzoneContainer = document.querySelector('.file-dropzone');
+        
+        // Drag & drop functionality
+        const dropzone = document.getElementById('fileDropzone');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropzone.classList.add('drag-over');
+        }
+        
+        function unhighlight() {
+            dropzone.classList.remove('drag-over');
+        }
+        
+        dropzone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFilePreview(files[0]);
+        }
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                updateFilePreview(this.files[0]);
+            } else {
+                hidePreview();
+            }
+        });
+        
+        function updateFilePreview(file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            let fileIcon = '📄';
+            
+            if (file.type === 'application/pdf') fileIcon = '📕';
+            else if (file.type.includes('word')) fileIcon = '📝';
+            else if (file.type.includes('presentation')) fileIcon = '📊';
+            else if (file.type.includes('sheet') || file.type.includes('excel')) fileIcon = '📈';
+            else if (file.type.includes('image')) fileIcon = '🖼️';
+            
+            fileName.innerHTML = `${fileIcon} ${file.name} <span class="file-size-preview">(${fileSize} MB)</span>`;
+            filePreview.style.display = 'flex';
+            dropzoneContainer.style.display = 'none';
+        }
+        
+        function hidePreview() {
+            filePreview.style.display = 'none';
+            dropzoneContainer.style.display = 'flex';
+            fileInput.value = '';
+        }
+        
+        removeFileBtn.addEventListener('click', function() {
+            hidePreview();
+        });
+        
+        // Loading state on submit
+        const form = document.getElementById('uploadForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', function() {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
