@@ -185,3 +185,31 @@ class CoursePost(models.Model):
     def __str__(self):
         return f"Publicación de {self.author.email} en {self.course.title}"
 
+
+class CourseMaterial(models.Model):
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="materials"
+    )
+
+    uploaded_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE
+    )
+
+    title = models.CharField(max_length=150)
+
+    description = models.TextField(blank=True)
+
+    file = models.FileField(
+        upload_to="course_materials/"
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.title} - {self.course.title}"

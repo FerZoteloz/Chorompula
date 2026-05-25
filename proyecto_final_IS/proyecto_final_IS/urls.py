@@ -36,6 +36,7 @@ from accounts.views import (
     salir_curso_view,
 # Fin.FS.19.05.2026
     inscribirse_codigo_view,
+    subir_material_view,
 )
 
 urlpatterns = [
@@ -66,5 +67,12 @@ urlpatterns = [
         course_detail_view,
         name='course_detail'
     ),
+    path("course/<int:course_id>/upload-material/", subir_material_view, name="upload_material"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

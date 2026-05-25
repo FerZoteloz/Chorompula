@@ -887,3 +887,219 @@ body {
         order: -1; /* Mover tareas arriba en móviles */
     }
 }
+
+.materials-section {
+    margin-top: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.title-icon {
+    font-size: 1.75rem;
+}
+
+.upload-material-btn {
+    background: linear-gradient(135deg, #06b6d4, #6366f1);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-material-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+    background: linear-gradient(135deg, #0891b2, #4f46e5);
+}
+
+/* Grid de materiales */
+.materials-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Tarjeta de material mejorada */
+.material-card-enhanced {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.material-card-enhanced:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(5px);
+    border-color: rgba(6, 182, 212, 0.4);
+}
+
+/* Icono del material */
+.material-icon {
+    font-size: 2.5rem;
+    min-width: 60px;
+    text-align: center;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+}
+
+/* Información del material */
+.material-info {
+    flex: 1;
+}
+
+.material-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+}
+
+.material-description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}
+
+.material-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.meta-item {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta-icon {
+    font-size: 0.8rem;
+}
+
+/* Botón de descarga */
+.download-btn {
+    background: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
+    padding: 8px 18px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    white-space: nowrap;
+}
+
+.download-btn:hover {
+    background: #06b6d4;
+    color: white;
+    border-color: #06b6d4;
+    transform: scale(1.02);
+}
+
+.empty-materials {
+    text-align: center;
+    padding: 48px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.empty-materials p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.empty-materials small {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .material-card-enhanced {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .material-icon {
+        font-size: 2rem;
+        min-width: auto;
+    }
+    
+    .material-meta {
+        justify-content: center;
+    }
+    
+    .download-btn {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .upload-material-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .materials-section {
+        padding: 16px;
+    }
+    
+    .material-meta {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

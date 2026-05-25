@@ -87,6 +87,81 @@
         </div>
     </div>
 {% endfor %}
+
+<!-- SECCIÓN MEJORADA: Materiales del curso -->
+<div class="materials-section">
+    <div class="section-header">
+        <h3 class="section-title">
+            <span class="title-icon">📚</span> Materiales del curso
+        </h3>
+        
+        {% if puede_publicar %}
+            <a href="{% url 'upload_material' course.id %}" class="upload-material-btn">
+                + Subir material
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="materials-grid">
+        {% if materials %}
+            {% for material in materials %}
+                <div class="material-card-enhanced">
+                    <div class="material-icon">
+                        {% if material.file.url|slice:"-4:" == ".pdf" %}
+                            📄
+                        {% elif material.file.url|slice:"-4:" == ".doc" or material.file.url|slice:"-5:" == ".docx" %}
+                            📝
+                        elif material.file.url|slice:"-4:" == ".ppt" or material.file.url|slice:"-5:" == ".pptx" %}
+                            📊
+                        elif material.file.url|slice:"-4:" == ".xls" or material.file.url|slice:"-5:" == ".xlsx" %}
+                            📈
+                        elif material.file.url|slice:"-4:" == ".jpg" or material.file.url|slice:"-5:" == ".jpeg" or material.file.url|slice:"-4:" == ".png" %}
+                            🖼️
+                        else %}
+                            📁
+                        {% endif %}
+                    </div>
+                    
+                    <div class="material-info">
+                        <h4 class="material-title">{{ material.title }}</h4>
+                        
+                        {% if material.description %}
+                            <p class="material-description">{{ material.description }}</p>
+                        {% endif %}
+                        
+                        <div class="material-meta">
+                            <span class="meta-item">
+                                <span class="meta-icon">👤</span> 
+                                {{ material.uploaded_by.nombre_pila }}
+                            </span>
+                            <span class="meta-item">
+                                <span class="meta-icon">📅</span> 
+                                {{ material.created_at|date:"d/m/Y" }}
+                            </span>
+                            <span class="meta-item file-size">
+                                <span class="meta-icon">💾</span> 
+                                {{ material.file.size|filesizeformat }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ material.file.url }}" class="download-btn" target="_blank" download>
+                        ↓ Descargar
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-materials">
+                <div class="empty-icon">📭</div>
+                <p>No hay materiales disponibles aún.</p>
+                {% if puede_publicar %}
+                    <small>Haz clic en "Subir material" para compartir recursos con tus estudiantes.</small>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
                     <!-- Material Post -->
                     <div class="announcement-card">
                         <div class="post-header">

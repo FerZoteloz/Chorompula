@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
-from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost
+from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, CourseMaterial
 import json
 
 
@@ -236,6 +236,8 @@ def course_detail_view(request, course_id):
 
     puede_publicar = role == "admin" or es_profesor_del_curso
 
+    materials = course.materials.all()
+
     if request.method == "POST":
         if not puede_publicar:
             return redirect("course_detail", course_id=course.id)
@@ -261,6 +263,7 @@ def course_detail_view(request, course_id):
         {
             "course": course,
             "posts": posts,
+            "materials": materials,
             "puede_publicar": puede_publicar
         }
     )
@@ -273,43 +276,6 @@ def lista_usuarios_view(request):
     return render(request, "admin_usuarios/lista_usuarios.html", {
         "profiles": profiles
     })
-
-
-"""@login_required
-def editar_usuario_view(request, profile_id):
-    profile = Profile.objects.get(id=profile_id)
-
-    if request.method == "GET":
-        return render(request, "admin_usuarios/editar_usuario.html", {
-            "profile": profile
-        })
-
-    if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        role = request.POST.get("role")
-
-        if User.objects.filter(username=username).exclude(id=profile.user.id).exists():
-            return render(request, "admin_usuarios/editar_usuario.html", {
-                "profile": profile,
-                "error": "Ese nombre de usuario ya está en uso"
-            })
-
-        if User.objects.filter(email=email).exclude(id=profile.user.id).exists():
-            return render(request, "admin_usuarios/editar_usuario.html", {
-                "profile": profile,
-                "error": "Ese correo ya está en uso"
-            })
-
-        profile.user.username = username
-        profile.user.email = email
-        profile.user.save()
-
-        profile.role = role
-        profile.save()
-
-        return redirect("/admin-usuarios/")"""
-
 
 # Ini.FS.19.05.2026
 @login_required
@@ -548,3 +514,49 @@ def salir_curso_view(request, course_id):
             relacion.delete()
 
     return redirect("dashboard")
+
+@login_required
+def subir_material_view(request, course_id):
+
+    course = get_object_or_404(
+        Course,
+        id=course_id
+    )
+
+    es_profesor = UsuarioCurso.objects.filter(
+        usuario=request.user,
+        curso=course,
+        rol_en_curso="teacher"
+    ).exists()
+
+    if not es_profesor and request.user.profile.role != "admin":
+        return redirect("dashboard")
+
+    if request.method == "POST":
+
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        file = request.FILES.get("file")
+
+        if title and file:
+
+            CourseMaterial.objects.create(
+                course=course,
+                uploaded_by=request.user,
+                title=title,
+                description=description,
+                file=file
+            )
+
+            return redirect(
+                "course_detail",
+                course_id=course.id
+            )
+
+    return render(
+        request,
+        "dashboards/courses/subir_material.html",
+        {
+            "course": course
+        }
+    )
