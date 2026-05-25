@@ -188,6 +188,11 @@ class CoursePost(models.Model):
 
 class CourseMaterial(models.Model):
 
+    ESTADO_CHOICES = [
+        ('borrador', '📝 Borrador'),
+        ('publicado', '✅ Publicado'),
+    ]
+
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -206,6 +211,8 @@ class CourseMaterial(models.Model):
     file = models.FileField(
         upload_to="course_materials/"
     )
+
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
 
     uploaded_at = models.DateTimeField(
         auto_now_add=True

@@ -162,30 +162,6 @@ def signup_view(request):
     }, status=405)
 
 
-# ===========================================
-
-"""
-
-    user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password
-            )
-
-            Profile.objects.create(
-                user=user,
-                role="student"
-            )
-
-            login(request, user)
-
-            return JsonResponse({
-                "success": True
-            })
-
-"""
-
-
 @login_required
 def dashboard_view(request):
     role = request.user.profile.role
@@ -236,7 +212,16 @@ def course_detail_view(request, course_id):
 
     puede_publicar = role == "admin" or es_profesor_del_curso
 
-    materials = course.materials.all()
+    if puede_publicar:
+        materials = CourseMaterial.objects.filter(
+            course=course
+        ).order_by("-uploaded_at")
+
+    else:
+        materials = CourseMaterial.objects.filter(
+            course=course,
+            estado="publicado"
+        ).order_by("-uploaded_at")
 
     if request.method == "POST":
         if not puede_publicar:
@@ -537,15 +522,23 @@ def subir_material_view(request, course_id):
         title = request.POST.get("title")
         description = request.POST.get("description")
         file = request.FILES.get("file")
+        accion = request.POST.get("accion")
 
         if title and file:
+
+            estado = (
+                "borrador"
+                if accion == "guardar_borrador"
+                else "publicado"
+            )
 
             CourseMaterial.objects.create(
                 course=course,
                 uploaded_by=request.user,
                 title=title,
                 description=description,
-                file=file
+                file=file,
+                estado=estado
             )
 
             return redirect(
