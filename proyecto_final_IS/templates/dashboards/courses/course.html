@@ -50,12 +50,12 @@
                 <!-- Left Column: Stream / Announcements -->
                 <div class="stream-column">
                     <!-- Share something box -->
-                     <!-- Agregamos publicar materiales (como pdf's) -->
+                     <!-- Agregamos boton de publicar materiales -->
                     {% if request.user.profile.role == 'teacher' %}
                     <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
                         <a href="{% url 'subir_material' course.id %}" 
                         style="background: #00c6ff; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: background 0.3s;">
-                            + Subir Material (PDF/Doc)
+                            Subir Material +
                         </a>
                     </div>
                     {% endif %}
