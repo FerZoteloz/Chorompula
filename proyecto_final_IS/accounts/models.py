@@ -3,7 +3,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import random
 import string
-
+#Nueva importacion
+from django.conf import settings
 
 # Create your models here.
 
@@ -186,14 +187,25 @@ class CoursePost(models.Model):
         return f"Publicación de {self.author.email} en {self.course.title}"
 
 class Material(models.Model):
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('publicado', 'Publicado'),
+    ]
+
     curso = models.ForeignKey(
-        Course, 
-        on_delete=models.CASCADE, 
+        Course,
+        on_delete=models.CASCADE,
         related_name='materiales'
     )
-    titulo = models.CharField(max_length=100)
-    # Los archivos los guardaremos en una carpeta llamada materiales_cursos
+    # Agregamos la lógica de tu compañero para saber quién lo subió
+    subido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    titulo = models.CharField(max_length=150)
+    descripcion = models.TextField(blank=True) # Campo nuevo
     archivo = models.FileField(upload_to="materiales_cursos/")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
     fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
