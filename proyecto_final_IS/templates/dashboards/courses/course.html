@@ -47,14 +47,19 @@
             </section>
 
             <div class="classroom-grid">
-                <!-- Left Column: Stream / Announcements -->
+                
                 <div class="stream-column">
-                    <!-- Share something box -->
-                     <!-- Agregamos boton de publicar materiales -->
+                    
                     {% if request.user.profile.role == 'teacher' %}
-                    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end;">
+                    <div style="margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 15px;">
+                        
+                        <a href="{% url 'mis_borradores' %}" 
+                           style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: background 0.3s;">
+                            📝 Ver mis borradores
+                        </a>
+
                         <a href="{% url 'subir_material' course.id %}" 
-                        style="background: #00c6ff; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: background 0.3s;">
+                           style="background: #00c6ff; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: background 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                             Subir Material +
                         </a>
                     </div>
@@ -64,103 +69,80 @@
                     <form method="POST" class="announcement-card share-box">
                         {% csrf_token %}
                         <div class="mini-avatar">👨‍🏫</div>
-                        <input
-                        type="text"
-                        name="content"
-                        placeholder="Anuncia algo a tu clase..."
-                        required
-                    >
+                        <input type="text" name="content" placeholder="Anuncia algo a tu clase..." required>
+                        <button type="submit" class="btn-sm">Publicar</button>
+                    </form>
+                    {% endif %}
 
-                    <button type="submit" class="btn-sm">
-                        Publicar
-                    </button>
-                </form>
-            {% endif %}
-
-            <!-- Agregamos esto para que aparezcan en orden -->
-            {% for item in feed_ordenado %}
-                
-                {% if item.titulo %}
-                    <div class="announcement-card">
-                        <div class="post-header">
-                            <div class="mini-avatar teacher">👨‍🏫</div>
-                            <div class="post-meta">
-                                <strong>Material publicado</strong>
-                                <span>{{ item.fecha_subida|date:"d/m/Y H:i" }}</span> 
-                            </div>
-                        </div>
-
-                        <div class="post-body">
-                            <p style="font-size: 1.1rem; margin-bottom: 10px;">{{ item.titulo }}</p>
-
-                            <a href="{{ item.archivo.url }}" target="_blank" style="text-decoration: none; color: inherit;">
-                                <div class="attachment-item" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.2); transition: background 0.3s;">
-                                    <span class="file-icon" style="font-size: 1.8rem;">📄</span>
-                                    <div class="file-info">
-                                        <p style="margin: 0; font-weight: bold; color: #00c6ff;">Ver archivo adjunto</p>
-                                        <span style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">Haz clic para abrir el documento</span>
+                    {% for item in feed_ordenado %}
+                        {% if item.titulo %}
+                            <div class="announcement-card">
+                                <div class="post-header">
+                                    <div class="mini-avatar teacher">📚</div>
+                                    <div class="post-meta">
+                                        <strong>Material publicado</strong>
+                                        <span>{{ item.fecha_subida|date:"d/m/Y H:i" }}</span> 
                                     </div>
                                 </div>
-                            </a>
-                        </div>
-                    </div>
+                                <div class="post-body">
+                                    <p style="font-size: 1.1rem; margin-bottom: 10px;">
+                                        {{ item.titulo }}
+                                        {% if item.estado == 'borrador' %}
+                                            <span style="background: #ff416c; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: 10px;">BORRADOR - Oculto a alumnos</span>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <p style="font-size: 0.8rem; color: #ccc;">Subido por: {{ item.subido_por.nombre_pila }} {{ item.subido_por.apellido_paterno }}</p>
 
-                {% else %}
-                    <div class="announcement-card">
-                        <div class="post-header">
-                            <div class="mini-avatar teacher">👨‍🏫</div>
-                            <div class="post-meta">
-                                <strong>{{ item.author.nombre_pila }} {{ item.author.apellido_paterno }}</strong>
-                                <span>{{ item.created_at|date:"d/m/Y H:i" }}</span>
+                                    {% if item.descripcion %}
+                                        <p style="color: #aaa; margin-bottom: 15px;">{{ item.descripcion }}</p>
+                                    {% endif %}
+
+                                    <a href="{{ item.archivo.url }}" target="_blank" style="text-decoration: none; color: inherit;">
+                                        <div class="attachment-item" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 15px; background: rgba(0, 0, 0, 0.2); transition: background 0.3s;">
+                                            <span class="file-icon" style="font-size: 1.8rem;">📄</span>
+                                            <div class="file-info">
+                                                <p style="margin: 0; font-weight: bold; color: #00c6ff;">Ver archivo adjunto</p>
+                                                <span style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">Haz clic para abrir el documento</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="announcement-card">
+                                <div class="post-header">
+                                    <div class="mini-avatar teacher">👨‍🏫</div>
+                                    <div class="post-meta">
+                                        <strong>{{ item.author.nombre_pila }} {{ item.author.apellido_paterno }}</strong>
+                                        <span>{{ item.created_at|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                </div>
+                                <div class="post-body">
+                                    <p>{{ item.content }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="announcement-card">
+                            <div class="post-body">
+                                <p>Aún no hay publicaciones ni materiales en este curso.</p>
                             </div>
                         </div>
-                        <div class="post-body">
-                            <p>{{ item.content }}</p>
-                        </div>
-                    </div>
-                {% endif %}
-
-            {% empty %}
-                <div class="announcement-card">
-                    <div class="post-body">
-                        <p>Aún no hay publicaciones ni materiales en este curso.</p>
-                    </div>
-                </div>
-            {% endfor %}
-            <!-- Aqui acabalo que agregamos -->
-
-                    <!-- Assignment Post -->
-                    <div class="announcement-card">
-                        <div class="post-header">
-                            <div class="mini-avatar assignment">📝</div>
-                            <div class="post-meta">
-                                <strong>Actividades del curso</strong>
-                                <span>Sin entregas pendientes por ahora</span>
-                            </div>
-                        </div>
-
-                        <button class="btn-sm outline">
-                            Ver instrucciones
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Column: Sidebar Tasks -->
-                <div class="upcoming-column">
+                    {% endfor %}
+                    
+                </div> <div class="upcoming-column">
                     <div class="upcoming-card">
                         <h4>Próximas entregas</h4>
-
                         <ul class="task-list">
                             <li>
                                 <p><strong>Sin fecha asignada</strong></p>
                                 <span>Cuando existan tareas, aparecerán aquí.</span>
                             </li>
                         </ul>
-
                         <a href="#" class="view-all">Ver todo</a>
                     </div>
-                </div>
-            </div>
+                </div> </div>
         </main>
     </div>
 
