@@ -134,19 +134,37 @@
                 <p>Curso: {{ curso.title }}</p>
             </div>
 
+            <!-- Nuevo bloque empieza aqui-->
             <form id="materialForm" enctype="multipart/form-data" class="login-form">
                 {% csrf_token %}
                 
                 <div class="form-group">
                     <label for="id_titulo">Título del Material</label>
-                    {{ form.titulo }}
+                    <input type="text" name="titulo" id="id_titulo" placeholder="Ej. Unidad 1 - Introducción" required>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="id_descripcion">Descripción (Opcional)</label>
+                    <textarea name="descripcion" id="id_descripcion" rows="3" style="width: 100%; padding: 12px 15px; background-color: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; box-sizing: border-box; font-family: sans-serif;" placeholder="Añade instrucciones o detalles para los alumnos..."></textarea>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="id_estado">¿Qué deseas hacer?</label>
+                    <select name="estado" id="id_estado" style="width: 100%; padding: 12px 15px; background-color: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; box-sizing: border-box; cursor: pointer;">
+                        <option value="publicado" style="color: black;">Publicar inmediatamente</option>
+                        <option value="borrador" style="color: black;">Guardar como borrador (Oculto)</option>
+                    </select>
                 </div>
 
                 <br>
 
                 <div class="form-group">
                     <label for="id_archivo">Seleccionar Archivo (PDF/Doc/Txt)</label>
-                    {{ form.archivo }}
+                    <input type="file" name="archivo" id="id_archivo" required>
                 </div>
 
                 <div class="button-group">
@@ -159,6 +177,7 @@
                     </a>
                 </div>
             </form>
+            <!-- Nuevo bloque termia aqui-->
         </div>
     </div>
 
