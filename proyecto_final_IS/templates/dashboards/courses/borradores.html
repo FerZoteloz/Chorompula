@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis borradores</title>
+    <link rel="stylesheet" href="{% static 'course.css' %}">
+    <style>
+        /* Contenedor centrado */
+        .draft-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            color: white;
+            font-family: sans-serif;
+        }
+
+        /* Tarjeta estilo Glassmorphism */
+        .draft-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn {
+            height: 40px; /* La misma altura exacta para los tres */
+            padding: 0 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-edit { background: #00c6ff; color: #1a1e29; }
+        .btn-publish { background: #28a745; color: white; }
+        .btn-delete { background: #ff416c; color: white; }
+
+        /* Estilo del enlace para regresar */
+        .link-volver {
+            display: inline-block;
+            color: #00c6ff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .link-volver:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body style="background-color: #2a2f4a;">
+
+    <div class="draft-container">
+        
+        <h1 style="margin-bottom: 40px; color: #00c6ff;">📝 Mis borradores</h1>
+
+        {% if borradores %}
+            {% for material in borradores %}
+            <div class="draft-card">
+                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem;">{{ material.titulo }}</h2>
+                <p style="color: #00c6ff; margin: 0 0 15px 0; font-weight: bold;">Curso: {{ material.curso.title }}</p>
+                
+                {% if material.descripcion %}
+                    <p style="color: #ccc; line-height: 1.5; margin-bottom: 15px;">{{ material.descripcion }}</p>
+                {% endif %}
+                
+                <small style="color: rgba(255, 255, 255, 0.5); display: block; margin-bottom: 25px;">
+                    Guardado el: {{ material.fecha_subida|date:"d/m/Y H:i" }}
+                </small>
+                
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="{% url 'editar_borrador' material.id %}" class="action-btn btn-edit">✏️ Editar</a>
+                    
+                    <form method="POST" action="{% url 'publicar_borrador' material.id %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-publish">✅ Publicar ahora</button>
+                    </form>
+
+                    <form method="POST" action="{% url 'eliminar_borrador' material.id %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-delete">🗑 Eliminar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="draft-card" style="text-align: center; padding: 60px 20px;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 15px;">📭</span>
+                <p style="font-size: 1.2rem; color: #ccc; margin: 0;">No tienes materiales guardados como borrador.</p>
+            </div>
+        {% endif %}
+        
+        {% if borradores %}
+            <a href="{% url 'course_detail' borradores.0.curso.id %}" class="link-volver">
+                &larr; Volver al Curso
+            </a>
+        {% else %}
+            <a href="#" onclick="window.history.back(); return false;" class="link-volver">
+                &larr; Volver
+            </a>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
