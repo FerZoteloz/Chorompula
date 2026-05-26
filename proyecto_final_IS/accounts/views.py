@@ -167,30 +167,6 @@ def signup_view(request):
     }, status=405)
 
 
-# ===========================================
-
-"""
-
-    user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password
-            )
-
-            Profile.objects.create(
-                user=user,
-                role="student"
-            )
-
-            login(request, user)
-
-            return JsonResponse({
-                "success": True
-            })
-
-"""
-
-
 @login_required
 def dashboard_view(request):
     role = request.user.profile.role
@@ -291,42 +267,6 @@ def lista_usuarios_view(request):
     return render(request, "admin_usuarios/lista_usuarios.html", {
         "profiles": profiles
     })
-
-
-"""@login_required
-def editar_usuario_view(request, profile_id):
-    profile = Profile.objects.get(id=profile_id)
-
-    if request.method == "GET":
-        return render(request, "admin_usuarios/editar_usuario.html", {
-            "profile": profile
-        })
-
-    if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        role = request.POST.get("role")
-
-        if User.objects.filter(username=username).exclude(id=profile.user.id).exists():
-            return render(request, "admin_usuarios/editar_usuario.html", {
-                "profile": profile,
-                "error": "Ese nombre de usuario ya está en uso"
-            })
-
-        if User.objects.filter(email=email).exclude(id=profile.user.id).exists():
-            return render(request, "admin_usuarios/editar_usuario.html", {
-                "profile": profile,
-                "error": "Ese correo ya está en uso"
-            })
-
-        profile.user.username = username
-        profile.user.email = email
-        profile.user.save()
-
-        profile.role = role
-        profile.save()
-
-        return redirect("/admin-usuarios/")"""
 
 
 # Ini.FS.19.05.2026
@@ -567,38 +507,78 @@ def salir_curso_view(request, course_id):
 
     return redirect("dashboard")
 
+# Subir materiales
 @login_required
 def subir_material_view(request, course_id):
-    # Tenemos que obtener el curso o arrojamos un error si no existe
-    curso = get_object_or_404(Course, id=course_id)
-    
-    # Validar si el usuario es profesor de ese curso
-    es_profesor_asignado = UsuarioCurso.objects.filter(
-        usuario=request.user,
-        curso=curso,
-        rol_en_curso='teacher'
+    course = get_object_or_404(Course, id=course_id)
+
+    es_profesor = UsuarioCurso.objects.filter(
+        usuario=request.user, curso=course, rol_en_curso="teacher"
     ).exists()
-    
-    if not es_profesor_asignado:
-        # Si se quiere forzar lo regresamos :)
-        return redirect('/dashboard/')
+
+    if not es_profesor and request.user.profile.role != "admin":
+        return redirect("dashboard")
 
     if request.method == "POST":
-        form = MaterialForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Guardamos
-            material = form.save(commit=False)
-            material.curso = curso # Asignamos el curso actual
-            material.save() # Se guarda en la DB
-            
-            return JsonResponse({"success": True, "message": "El material se subió correctamente"})
-        else:
-            return JsonResponse({"success": False, "message": "Formulario inválido"})
+        titulo = request.POST.get("titulo")
+        descripcion = request.POST.get("descripcion", "")
+        estado = request.POST.get("estado", "publicado")
+        archivo = request.FILES.get("archivo")
 
-    else:
-        form = MaterialForm()
+        if titulo and archivo:
+            Material.objects.create(
+                curso=course,
+                subido_por=request.user,
+                titulo=titulo,
+                descripcion=descripcion,
+                archivo=archivo,
+                estado=estado
+            )
+            return JsonResponse({"success": True, "message": "Material procesado correctamente."})
+        
+        return JsonResponse({"success": False, "message": "Faltan datos obligatorios."})
 
-    return render(request, "dashboards/courses/subir_material.html", {
-        "curso": curso,
-        "form": form
-    })
+    return render(request, "dashboards/courses/subir_material.html", {"curso": course})
+
+# Borradores
+@login_required
+def borradores_view(request):
+    borradores = Material.objects.filter(
+        subido_por=request.user,
+        estado="borrador"
+    )
+    return render(request, "dashboards/courses/borradores.html", {"borradores": borradores})
+
+@login_required
+def editar_borrador_view(request, material_id):
+    material = get_object_or_404(Material, id=material_id, subido_por=request.user)
+
+    if request.method == "GET":
+        return render(request, "dashboards/courses/editar_borrador.html", {"material": material})
+
+    if request.method == "POST":
+        material.titulo = request.POST.get("titulo")
+        material.descripcion = request.POST.get("descripcion")
+        nuevo_archivo = request.FILES.get("archivo")
+
+        if nuevo_archivo:
+            material.archivo = nuevo_archivo
+
+        material.save()
+        return redirect("mis_borradores")
+
+@login_required
+def publicar_borrador_view(request, material_id):
+    material = get_object_or_404(Material, id=material_id, subido_por=request.user)
+    if request.method == "POST":
+        material.estado = "publicado"
+        material.save()
+    return redirect("mis_borradores")
+
+@login_required
+def eliminar_borrador_view(request, material_id):
+    material = get_object_or_404(Material, id=material_id, subido_por=request.user)
+    if request.method == "POST":
+        material.archivo.delete(save=False)
+        material.delete()
+    return redirect("mis_borradores")
