@@ -88,16 +88,16 @@
                 </small>
                 
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="{% url 'editar_borrador' material.id %}" class="action-btn btn-edit">✏️ Editar</a>
+                    <a href="{% url 'editar_borrador' material.id %}" class="action-btn btn-edit">Editar</a>
                     
                     <form method="POST" action="{% url 'publicar_borrador' material.id %}" style="margin: 0;">
                         {% csrf_token %}
-                        <button type="submit" class="action-btn btn-publish">✅ Publicar ahora</button>
+                        <button type="submit" class="action-btn btn-publish">Publicar ahora</button>
                     </form>
 
                     <form method="POST" action="{% url 'eliminar_borrador' material.id %}" style="margin: 0;">
                         {% csrf_token %}
-                        <button type="submit" class="action-btn btn-delete">🗑 Eliminar</button>
+                        <button type="submit" class="action-btn btn-delete">Eliminar</button>
                     </form>
                 </div>
             </div>
