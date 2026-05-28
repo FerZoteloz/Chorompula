@@ -92,6 +92,10 @@ class Profesor(models.Model):
 
 
 class Course(models.Model):
+    ESTADO_CHOICES = [
+        ("activo", "Activo"),
+        ("cerrado", "Cerrado"),
+    ]
     title = models.CharField(max_length=100)
 
     language = models.CharField(max_length=50)
@@ -101,6 +105,12 @@ class Course(models.Model):
     week = models.IntegerField(default=1)
 
     progress = models.IntegerField(default=0)
+
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default="activo"
+    )
 
     codigo_inscripcion = models.CharField(
         max_length=12,
