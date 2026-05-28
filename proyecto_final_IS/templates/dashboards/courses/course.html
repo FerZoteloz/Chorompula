@@ -116,13 +116,13 @@
                             📄
                         {% elif material.file.url|slice:"-4:" == ".doc" or material.file.url|slice:"-5:" == ".docx" %}
                             📝
-                        elif material.file.url|slice:"-4:" == ".ppt" or material.file.url|slice:"-5:" == ".pptx" %}
+                        {% elif material.file.url|slice:"-4:" == ".ppt" or material.file.url|slice:"-5:" == ".pptx" %}
                             📊
-                        elif material.file.url|slice:"-4:" == ".xls" or material.file.url|slice:"-5:" == ".xlsx" %}
+                        {% elif material.file.url|slice:"-4:" == ".xls" or material.file.url|slice:"-5:" == ".xlsx" %}
                             📈
-                        elif material.file.url|slice:"-4:" == ".jpg" or material.file.url|slice:"-5:" == ".jpeg" or material.file.url|slice:"-4:" == ".png" %}
+                        {% elif material.file.url|slice:"-4:" == ".jpg" or material.file.url|slice:"-5:" == ".jpeg" or material.file.url|slice:"-4:" == ".png" %}
                             🖼️
-                        else %}
+                        {% else %}
                             📁
                         {% endif %}
                     </div>
@@ -139,30 +139,50 @@
                                 <span class="meta-icon">👤</span> 
                                 {{ material.uploaded_by.nombre_pila }}
                             </span>
+
                             <span class="meta-item">
                                 <span class="meta-icon">📅</span> 
-                                {{ material.created_at|date:"d/m/Y" }}
+                                {{ material.uploaded_at|date:"d/m/Y" }}
                             </span>
+
                             <span class="meta-item file-size">
                                 <span class="meta-icon">💾</span> 
                                 {{ material.file.size|filesizeformat }}
                             </span>
+
                             <span class="meta-item file-size">
                                 <span class="meta-icon">✅</span> 
-                                {{ material.estado }}
+                                {{ material.get_estado_display }}
                             </span>
                         </div>
                     </div>
-                    
-                    <a href="{{ material.file.url }}" class="download-btn" target="_blank" download>
-                        ↓ Descargar
-                    </a>
+
+                    <div class="material-actions">
+                        <a href="{{ material.file.url }}" class="download-btn" target="_blank" download>
+                            ↓ Descargar
+                        </a>
+
+                        {% if puede_publicar %}
+                            <form
+                                method="POST"
+                                action="{% url 'eliminar_material' material.id %}"
+                                onsubmit="return confirm('¿Seguro que quieres borrar este material?');"
+                            >
+                                {% csrf_token %}
+
+                                <button type="submit" class="delete-material-btn">
+                                    🗑 Borrar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
         {% else %}
             <div class="empty-materials">
                 <div class="empty-icon">📭</div>
                 <p>No hay materiales disponibles aún.</p>
+
                 {% if puede_publicar %}
                     <small>Haz clic en "Subir material" para compartir recursos con tus estudiantes.</small>
                 {% endif %}

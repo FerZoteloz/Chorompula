@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Datos personales</title>
+    <link rel="stylesheet" href="{% static 'settings.css' %}">
+</head>
+<body>
+
+<div class="settings-page">
+
+    <!-- Fondo decorativo -->
+    <div class="locks-background">
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+        <span>🔒</span>
+        <span>🔐</span>
+    </div>
+
+    <main class="settings-container">
+
+        <a href="{% url 'settings' %}" class="back-button">
+            ← Volver a configuración
+        </a>
+
+        <div class="settings-icon">📝</div>
+
+        <h1>Datos personales</h1>
+
+        <section class="profile-header">
+            <div class="profile-avatar">
+                {% if request.user.profile.avatar_image %}
+                    <img src="{{ request.user.profile.avatar_image.url }}" alt="Avatar">
+                {% else %}
+                    <span>{{ request.user.profile.avatar_emoji|default:"👤" }}</span>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h2>
+                    {{ request.user.nombre_pila }}
+                    {{ request.user.apellido_paterno }}
+                    {{ request.user.apellido_materno }}
+                </h2>
+                <p>{{ request.user.email }}</p>
+            </div>
+
+            <div class="status-badge">
+                <span></span>
+                Cuenta activa
+            </div>
+        </section>
+
+        <section class="contact-card">
+
+            <h2 class="contact-title">Modificar datos de contacto</h2>
+            <p class="contact-subtitle">
+                Actualiza tu nombre y correo electrónico asociados a tu cuenta.
+            </p>
+
+            {% if success %}
+                <div class="contact-message success-message-box">
+                    {{ success }}
+                </div>
+            {% endif %}
+
+            {% if error %}
+                <div class="contact-message error-message-box">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST" class="contact-form">
+                {% csrf_token %}
+
+                <div class="contact-field">
+                    <label for="{{ form.nombre_pila.id_for_label }}">
+                        {{ form.nombre_pila.label }}
+                    </label>
+                    {{ form.nombre_pila }}
+                    {% for error in form.nombre_pila.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="contact-field">
+                    <label for="{{ form.apellido_paterno.id_for_label }}">
+                        {{ form.apellido_paterno.label }}
+                    </label>
+                    {{ form.apellido_paterno }}
+                    {% for error in form.apellido_paterno.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="contact-field">
+                    <label for="{{ form.apellido_materno.id_for_label }}">
+                        {{ form.apellido_materno.label }}
+                    </label>
+                    {{ form.apellido_materno }}
+                    {% for error in form.apellido_materno.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="contact-field">
+                    <label for="{{ form.email.id_for_label }}">
+                        {{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <small class="field-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+
+                <div class="contact-actions">
+                    <a href="{% url 'settings' %}" class="cancel-contact-btn">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="save-contact-btn">
+                        Guardar cambios
+                    </button>
+                </div>
+            </form>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

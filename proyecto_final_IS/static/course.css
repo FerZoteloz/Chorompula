@@ -1104,7 +1104,49 @@ body {
     }
 }
 
-/* Botón de cerrar curso */
+
+
+.material-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+}
+
+
+.delete-material-btn {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.delete-material-btn:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .material-actions {
+        width: 100%;
+    }
+
+    .delete-material-btn {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+    }
+}
+
+
 .btn-danger {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     border: none;
@@ -1150,7 +1192,7 @@ body {
     transform: translateY(0);
 }
 
-/* Modal de confirmación */
+
 .modal {
     display: none;
     position: fixed;

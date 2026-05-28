@@ -33,6 +33,7 @@ from accounts.views import (
 # Ini.FS.19.05.2026
     profile_settings_view,
     settings_view,
+    editar_contacto_view,
     salir_curso_view,
 # Fin.FS.19.05.2026
     inscribirse_codigo_view,
@@ -41,6 +42,7 @@ from accounts.views import (
     editar_borrador_view,
     publicar_borrador_view,
     eliminar_borrador_view,
+    eliminar_material_view,
     cerrar_curso_view,
 )
 
@@ -64,6 +66,7 @@ urlpatterns = [
 # Ini.FS.19.05.2026
     path('perfil/', profile_settings_view, name='profile_settings'),
     path('configuracion/', settings_view, name='settings'),
+    path('contacto/', editar_contacto_view, name='editar_contacto'),
     path('inscribirse/', inscribirse_codigo_view, name='inscribirse_codigo'),
     path('curso/<int:course_id>/salir/', salir_curso_view, name='salir_curso'),
 # Fin.FS.19.05.2026
@@ -77,7 +80,8 @@ urlpatterns = [
     path("borrador/<int:material_id>/editar/", editar_borrador_view, name="editar_borrador"),
     path("borrador/<int:material_id>/publicar/",publicar_borrador_view, name="publicar_borrador"),
     path("borrador/<int:material_id>/eliminar/", eliminar_borrador_view, name="eliminar_borrador"),
-    path("course/<int:course_id>/cerrar/",cerrar_curso_view, name="cerrar_curso"),
+    path("material/<int:material_id>/eliminar/", eliminar_material_view, name="eliminar_material"),
+    path("course/<int:course_id>/cerrar/", cerrar_curso_view, name="cerrar_curso"),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

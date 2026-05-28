@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
 from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, Material
+from accounts.forms import ContactDataForm
 import json
 
 
@@ -441,6 +442,35 @@ def profile_settings_view(request):
 @login_required
 def settings_view(request):
     return render(request, "accounts/settings.html")
+@login_required
+def editar_contacto_view(request):
+    if request.method == "GET":
+        form = ContactDataForm(instance=request.user)
+
+        return render(request, "accounts/contact_settings.html", {
+            "form": form
+        })
+
+    if request.method == "POST":
+        form = ContactDataForm(
+            request.POST,
+            instance=request.user
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return render(request, "accounts/contact_settings.html", {
+                "form": form,
+                "success": "Tus datos de contacto se actualizaron correctamente."
+            })
+
+        return render(request, "accounts/contact_settings.html", {
+            "form": form,
+            "error": "Revisa los campos marcados antes de guardar."
+        })
+
+    return redirect("settings")
 # Fin.FS.19.05.2026
 
 @login_required
@@ -625,6 +655,46 @@ def eliminar_borrador_view(request, material_id):
     return redirect("mis_borradores")
 
 @login_required
+def eliminar_material_view(request, material_id):
+
+    material = get_object_or_404(
+        Material,
+        id=material_id
+    )
+
+    course = material.course
+
+    es_profesor_del_curso = UsuarioCurso.objects.filter(
+        usuario=request.user,
+        curso=course,
+        rol_en_curso="teacher"
+    ).exists()
+
+    puede_borrar = (
+        request.user.profile.role == "admin"
+        or es_profesor_del_curso
+    )
+
+    if not puede_borrar:
+        return redirect(
+            "course_detail",
+            course_id=course.id
+        )
+
+    if request.method == "POST":
+
+        if material.archivo:
+            material.archivo.delete(save=False)
+
+        material.delete()
+
+    return redirect(
+        "course_detail",
+        course_id=course.id
+    )
+
+
+@login_required
 def cerrar_curso_view(request, course_id):
 
     course = get_object_or_404(
@@ -647,6 +717,12 @@ def cerrar_curso_view(request, course_id):
 
         course.estado = "cerrado"
         course.save()
+
+    return redirect(
+        "course_detail",
+        course_id=course.id
+    )
+
 
     return redirect(
         "course_detail",
