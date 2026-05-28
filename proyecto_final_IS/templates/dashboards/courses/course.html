@@ -37,7 +37,12 @@
             <!-- Course Banner -->
             <section class="course-banner">
                 <div class="banner-content">
-                    <h1>{{ course.title }}</h1>
+                    <h1>{{ course.title }}
+                        {% if course.estado == "cerrado" %}
+                            <span>Cerrado</span>
+                        {% else %}
+                        {% endif %}
+                    </h1>
                     <p>Curso de {{ course.language }}</p>
                 </div>
 
@@ -196,6 +201,22 @@
 
                         <a href="#" class="view-all">Ver todo</a>
                     </div>
+                    {% if puede_publicar and course.estado == "activo" %}
+
+                    <form
+                        method="POST"
+                        action="{% url 'cerrar_curso' course.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button class="btn-danger">
+                            🔒 Cerrar curso
+                        </button>
+
+                    </form>
+
+                    {% endif %}
                 </div>
             </div>
         </main>

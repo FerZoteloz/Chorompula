@@ -210,7 +210,10 @@ def course_detail_view(request, course_id):
         rol_en_curso="teacher"
     ).exists()
 
-    puede_publicar = role == "admin" or es_profesor_del_curso
+    puede_publicar = (
+        (role == "admin" or es_profesor_del_curso)
+        and course.estado == "activo"
+    )
 
     if puede_publicar:
         materials = Material.objects.filter(
@@ -455,7 +458,10 @@ def inscribirse_codigo_view(request):
         if not codigo:
             error = "Debes ingresar un código de inscripción."
         else:
-            curso = Course.objects.filter(codigo_inscripcion=codigo).first()
+            curso = Course.objects.filter(
+                codigo_inscripcion=codigo,
+                estado="activo"
+                ).first()
 
             if not curso:
                 error = "El código ingresado no existe."
@@ -510,6 +516,12 @@ def subir_material_view(request, course_id):
 
     if not es_profesor and request.user.profile.role != "admin":
         return redirect("dashboard")
+    
+    if course.estado == "cerrado":
+        return redirect(
+            "course_detail",
+            course_id=course.id
+        )
 
     if request.method == "POST":
         titulo = request.POST.get("titulo")
