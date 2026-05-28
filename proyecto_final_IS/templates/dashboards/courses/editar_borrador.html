@@ -1,30 +1,64 @@
-<h2>Editar borrador</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Borrador</title>
+    <link rel="stylesheet" href="{% static 'course.css' %}">
+    <style>
+        .upload-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; font-family: sans-serif; }
+        .upload-card { width: 100%; max-width: 500px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 40px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px); }
+        .upload-header { text-align: center; margin-bottom: 30px; }
+        .upload-header h2 { margin: 0 0 10px 0; font-size: 2rem; color: #00c6ff; }
+        .form-group label { color: white; display: block; margin-bottom: 10px; text-align: center; font-weight: bold; }
+        .login-form input[type="text"], .login-form textarea, .login-form input[type="file"] { width: 100%; padding: 12px 15px; background-color: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; box-sizing: border-box; }
+        .login-form input[type="text"]:focus, .login-form textarea:focus { outline: none; border-color: #00c6ff; }
+        .btn-primary { display: block; width: 100%; padding: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 50px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.3s ease; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { display: block; width: 100%; padding: 12px; margin-top: 15px; background-color: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.7); text-align: center; border-radius: 50px; text-decoration: none; font-weight: bold; transition: all 0.3s ease; box-sizing: border-box; }
+        .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.1); color: white; border-color: rgba(255, 255, 255, 0.4); }
+    </style>
+</head>
+<body style="background-color: #2a2f4a;">
 
-<form
-    method="POST"
-    enctype="multipart/form-data"
->
+    <div class="upload-container">
+        <div class="upload-card">
+            <div class="upload-header">
+                <h2>✏️ Editar Borrador</h2>
+            </div>
 
-    {% csrf_token %}
+            <form method="POST" enctype="multipart/form-data" class="login-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_titulo">Título del Material</label>
+                    <input type="text" name="titulo" id="id_titulo" value="{{ material.titulo }}" required>
+                </div>
 
-    <input
-        type="text"
-        name="title"
-        value="{{ material.title }}"
-        required
-    >
+                <br>
 
-    <textarea
-        name="description"
-    >{{ material.description }}</textarea>
+                <div class="form-group">
+                    <label for="id_descripcion">Descripción (Opcional)</label>
+                    <textarea name="descripcion" id="id_descripcion" rows="3">{{ material.descripcion }}</textarea>
+                </div>
 
-    <input
-        type="file"
-        name="file"
-    >
+                <br>
 
-    <button type="submit">
-        Guardar cambios
-    </button>
+                <div class="form-group">
+                    <label for="id_archivo">Actualizar Archivo (Opcional)</label>
+                    <p style="font-size: 0.8rem; color: #ccc; text-align: center; margin-top: 0;">
+                        Documento actual: <strong style="color: #00c6ff;">{{ material.archivo.name }}</strong>
+                    </p>
+                    <input type="file" name="archivo" id="id_archivo">
+                </div>
 
-</form>
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                    <a href="{% url 'mis_borradores' %}" class="btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -47,12 +47,7 @@
 
                     <div class="buttons-row">
 
-                        <a
-                            href="{% url 'editar_borrador' material.id %}"
-                            class="btn-sm"
-                        >
-                            ✏️ Editar
-                        </a>
+                        <a href="{% url 'editar_borrador' material.id %}" class="btn-sm">Editar</a>
 
                         <form
                             method="POST"
@@ -62,7 +57,7 @@
                             {% csrf_token %}
 
                             <button class="btn-sm">
-                                ✅ Publicar
+                                Publicar
                             </button>
 
                         </form>
@@ -75,7 +70,7 @@
                             {% csrf_token %}
 
                             <button class="btn-sm">
-                                🗑 Eliminar
+                                Eliminar
                             </button>
 
                         </form>
