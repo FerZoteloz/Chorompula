@@ -9,6 +9,8 @@ from django.db import transaction
 from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, Material
 from accounts.forms import ContactDataForm
 import json
+from itertools import chain
+from django.db.models import Count, Q
 
 
 def login_view(request):
@@ -728,3 +730,51 @@ def cerrar_curso_view(request, course_id):
         "course_detail",
         course_id=course.id
     )
+
+@login_required
+def explorar_cursos_view(request):
+    if request.user.profile.role != "student":
+        return redirect("dashboard")
+
+    cursos_inscritos_ids = UsuarioCurso.objects.filter(
+        usuario=request.user,
+        rol_en_curso="student"
+    ).values_list('curso_id', flat=True)
+
+    # Mostramos los cursos y exclimos en los que ya esta
+    cursos_disponibles = Course.objects.exclude(
+        id__in=cursos_inscritos_ids
+    ).annotate(
+        num_alumnos=Count('usuariocurso', filter=Q(usuariocurso__rol_en_curso='student'))
+    )
+
+    # Información del profesor
+    for curso in cursos_disponibles:
+        profe_relacion = curso.usuariocurso_set.filter(rol_en_curso='teacher').first()
+        if profe_relacion:
+            curso.profesor = profe_relacion.usuario
+        else:
+            curso.profesor = None
+
+    return render(request, "dashboards/explorar_cursos.html", {
+        "cursos_disponibles": cursos_disponibles
+    })
+
+@login_required
+def inscribirse_directo_view(request, course_id):
+    if request.user.profile.role != "student":
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        curso = get_object_or_404(Course, id=course_id)
+        
+        ya_inscrito = UsuarioCurso.objects.filter(usuario=request.user, curso=curso).exists()
+        
+        if not ya_inscrito:
+            UsuarioCurso.objects.create(
+                usuario=request.user,
+                curso=curso,
+                rol_en_curso="student"
+            )
+            
+    return redirect("dashboard")
