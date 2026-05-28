@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
-from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, CourseMaterial
+from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, Material
 import json
 
 
@@ -213,15 +213,15 @@ def course_detail_view(request, course_id):
     puede_publicar = role == "admin" or es_profesor_del_curso
 
     if puede_publicar:
-        materials = CourseMaterial.objects.filter(
+        materials = Material.objects.filter(
             course=course
-        ).order_by("-uploaded_at")
+        ).order_by("-subido_por")
 
     else:
-        materials = CourseMaterial.objects.filter(
+        materials = Material.objects.filter(
             course=course,
             estado="publicado"
-        ).order_by("-uploaded_at")
+        ).order_by("-subido_por")
 
     if request.method == "POST":
         if not puede_publicar:
@@ -502,63 +502,41 @@ def salir_curso_view(request, course_id):
 
 @login_required
 def subir_material_view(request, course_id):
-
-    course = get_object_or_404(
-        Course,
-        id=course_id
-    )
+    course = get_object_or_404(Course, id=course_id)
 
     es_profesor = UsuarioCurso.objects.filter(
-        usuario=request.user,
-        curso=course,
-        rol_en_curso="teacher"
+        usuario=request.user, curso=course, rol_en_curso="teacher"
     ).exists()
 
     if not es_profesor and request.user.profile.role != "admin":
         return redirect("dashboard")
 
     if request.method == "POST":
+        titulo = request.POST.get("titulo")
+        descripcion = request.POST.get("descripcion", "")
+        estado = request.POST.get("estado", "publicado")
+        archivo = request.FILES.get("archivo")
 
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        file = request.FILES.get("file")
-        accion = request.POST.get("accion")
-
-        if title and file:
-
-            estado = (
-                "borrador"
-                if accion == "guardar_borrador"
-                else "publicado"
-            )
-
-            CourseMaterial.objects.create(
+        if titulo and archivo:
+            Material.objects.create(
                 course=course,
-                uploaded_by=request.user,
-                title=title,
-                description=description,
-                file=file,
+                subido_por=request.user,
+                titulo=titulo,
+                description=descripcion,
+                archivo=archivo,
                 estado=estado
             )
+            return JsonResponse({"success": True, "message": "Material procesado correctamente."})
+        
+        return JsonResponse({"success": False, "message": "Faltan datos obligatorios."})
 
-            return redirect(
-                "course_detail",
-                course_id=course.id
-            )
-
-    return render(
-        request,
-        "dashboards/courses/subir_material.html",
-        {
-            "course": course
-        }
-    )
+    return render(request, "dashboards/courses/subir_material.html", {"curso": course})
 
 @login_required
 def borradores_view(request):
 
-    borradores = CourseMaterial.objects.filter(
-        uploaded_by=request.user,
+    borradores = Material.objects.filter(
+        subido_por=request.user,
         estado="borrador"
     )
 
@@ -574,9 +552,9 @@ def borradores_view(request):
 def editar_borrador_view(request, material_id):
 
     material = get_object_or_404(
-        CourseMaterial,
+        Material,
         id=material_id,
-        uploaded_by=request.user
+        subido_por=request.user
     )
 
     if request.method == "GET":
@@ -606,9 +584,9 @@ def editar_borrador_view(request, material_id):
 def publicar_borrador_view(request, material_id):
 
     material = get_object_or_404(
-        CourseMaterial,
+        Material,
         id=material_id,
-        uploaded_by=request.user
+        subido_por=request.user
     )
 
     if request.method == "POST":
@@ -622,9 +600,9 @@ def publicar_borrador_view(request, material_id):
 def eliminar_borrador_view(request, material_id):
 
     material = get_object_or_404(
-        CourseMaterial,
+        Material,
         id=material_id,
-        uploaded_by=request.user
+        subido_por=request.user
     )
 
     if request.method == "POST":

@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import random
 import string
+from django.conf import settings
 
 
 # Create your models here.
@@ -186,7 +187,7 @@ class CoursePost(models.Model):
         return f"Publicación de {self.author.email} en {self.course.title}"
 
 
-class CourseMaterial(models.Model):
+class Material(models.Model):
 
     ESTADO_CHOICES = [
         ('borrador', '📝 Borrador'),
@@ -199,24 +200,20 @@ class CourseMaterial(models.Model):
         related_name="materials"
     )
 
-    uploaded_by = models.ForeignKey(
-        CustomUser,
+    subido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
 
-    title = models.CharField(max_length=150)
+    titulo = models.CharField(max_length=150)
 
     description = models.TextField(blank=True)
 
-    file = models.FileField(
-        upload_to="course_materials/"
-    )
+    archivo = models.FileField(upload_to="materiales_cursos/")
 
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
 
-    uploaded_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} - {self.course.title}"
+        return f"{self.title} - {self.course.titulo}"

@@ -3,202 +3,240 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir material - {{ course.title }}</title>
-    <link rel="stylesheet" href="{% static 'subir_material.css' %}">
+    <title>Subir Material - {{ curso.title }}</title>
+    <link rel="stylesheet" href="{% static 'course.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Ajuste de la tarjeta */
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Estilo de la tarjeta */
+        .upload-card {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .upload-header p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+        }
+
+        /* Títulos */
+        .form-group label {
+            color: white; 
+            display: block; 
+            margin-bottom: 10px; 
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Inputs */
+        .login-form input[type="text"],
+        .login-form input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .login-form input[type="text"]:focus {
+            outline: none;
+            border-color: #00c6ff;
+        }
+        
+        .login-form input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Ponemos colores llamativos para que se vea como el Botón Principal */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        /* Botón Secundario */
+        .btn-secondary {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .button-group {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
+
     <div class="upload-container">
         <div class="upload-card">
-            <!-- Botón de volver -->
-            <a href="{% url 'course_detail' course.id %}" class="back-button">
-                ← Volver al curso
-            </a>
-
-            <!-- Encabezado -->
             <div class="upload-header">
-                <div class="upload-icon">📤</div>
-                <h2>Subir material</h2>
-                <p class="course-info">Curso: <strong>{{ course.title }}</strong></p>
-                <p class="upload-hint">Comparte archivos, documentos o recursos con tus estudiantes</p>
+                <h2>Subir Material</h2>
+                <p>Curso: {{ curso.title }}</p>
             </div>
 
-            <!-- Formulario -->
-            <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+            <!-- Nuevo bloque empieza aqui-->
+            <form id="materialForm" enctype="multipart/form-data" class="login-form">
                 {% csrf_token %}
-
-                <!-- Campo: Título -->
-                <div class="form-group-material">
-                    <div class="input-wrapper-material">
-                        <input
-                            type="text"
-                            name="title"
-                            id="title"
-                            placeholder=" "
-                            required
-                            autocomplete="off"
-                        >
-                        <label for="title">Título del material *</label>
-                        <div class="focus-border"></div>
-                    </div>
-                    <small class="input-hint">Ej: "Guía de estudio unidad 1", "Presentación clase 3", etc.</small>
+                
+                <div class="form-group">
+                    <label for="id_titulo">Título del Material</label>
+                    <input type="text" name="titulo" id="id_titulo" placeholder="Ej. Unidad 1 - Introducción" required>
                 </div>
 
-                <!-- Campo: Descripción -->
-                <div class="form-group-material">
-                    <div class="input-wrapper-material textarea-wrapper">
-                        <textarea
-                            name="description"
-                            id="description"
-                            placeholder=" "
-                            rows="4"
-                        ></textarea>
-                        <label for="description">Descripción (opcional)</label>
-                        <div class="focus-border"></div>
-                    </div>
-                    <small class="input-hint">Describe brevemente el contenido del archivo</small>
+                <br>
+
+                <div class="form-group">
+                    <label for="id_descripcion">Descripción (Opcional)</label>
+                    <textarea name="descripcion" id="id_descripcion" rows="3" style="width: 100%; padding: 12px 15px; background-color: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; box-sizing: border-box; font-family: sans-serif;" placeholder="Añade instrucciones o detalles para los alumnos..."></textarea>
                 </div>
 
-                <!-- Campo: Archivo -->
-                <div class="form-group-material file-upload-group">
-                    <label class="file-label" for="file">
-                        <div class="file-dropzone" id="fileDropzone">
-                            <div class="file-icon">📁</div>
-                            <p class="file-message">Arrastra tu archivo aquí o haz clic para seleccionar</p>
-                            <p class="file-hint">PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG (Máx. 100MB)</p>
-                            <input
-                                type="file"
-                                name="file"
-                                id="file"
-                                required
-                                accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png"
-                            >
-                        </div>
-                    </label>
-                    <div class="file-info-preview" id="filePreview" style="display: none;">
-                        <span class="preview-icon">📄</span>
-                        <span class="preview-name" id="fileName"></span>
-                        <button type="button" class="remove-file" id="removeFile">✕</button>
-                    </div>
+                <br>
+
+                <div class="form-group">
+                    <label for="id_estado">¿Qué deseas hacer?</label>
+                    <select name="estado" id="id_estado" style="width: 100%; padding: 12px 15px; background-color: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: white; box-sizing: border-box; cursor: pointer;">
+                        <option value="publicado" style="color: black;">Publicar inmediatamente</option>
+                        <option value="borrador" style="color: black;">Guardar como borrador (Oculto)</option>
+                    </select>
                 </div>
 
-                <!-- Barra de progreso (opcional) -->
-                <div class="progress-container" id="progressContainer" style="display: none;">
-                    <div class="progress-bar" id="progressBar"></div>
-                    <span class="progress-text" id="progressText">0%</span>
+                <br>
+
+                <div class="form-group">
+                    <label for="id_archivo">Seleccionar Archivo (PDF/Doc/Txt)</label>
+                    <input type="file" name="archivo" id="id_archivo" required>
                 </div>
 
-                <!-- Botón de envío -->
-                <button type="submit" class="submit-material-btn" id="submitBtn">
-                    <span class="btn-text">📤 Subir material</span>
-                    <span class="btn-loader"></span>
-                </button>
-
-                <button type="submit" name="accion" value="guardar_borrador">
-                    Guardar borrador
-                </button>
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        <span class="btn-text">Subir Archivo</span>
+                    </button>
+                    
+                    <a href="{% url 'course_detail' curso.id %}" class="btn-secondary">
+                        Volver al Curso
+                    </a>
+                </div>
             </form>
-
-            <!-- Mensajes de error adicionales -->
-            {% if messages %}
-                <div class="messages-container">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <!-- Nuevo bloque termia aqui-->
         </div>
     </div>
 
-    <script>
-        // Previsualización del archivo seleccionado
-        const fileInput = document.getElementById('file');
-        const filePreview = document.getElementById('filePreview');
-        const fileName = document.getElementById('fileName');
-        const removeFileBtn = document.getElementById('removeFile');
-        const fileDropzone = document.getElementById('fileDropzone');
-        const dropzoneContainer = document.querySelector('.file-dropzone');
-        
-        // Drag & drop functionality
-        const dropzone = document.getElementById('fileDropzone');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            dropzone.classList.add('drag-over');
-        }
-        
-        function unhighlight() {
-            dropzone.classList.remove('drag-over');
-        }
-        
-        dropzone.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            updateFilePreview(files[0]);
-        }
-        
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                updateFilePreview(this.files[0]);
-            } else {
-                hidePreview();
+<script>
+document.getElementById("materialForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const btnText = this.querySelector(".btn-text");
+    if(btnText) btnText.textContent = "Subiendo archivo...";
+
+    try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const response = await fetch(window.location.href, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
             }
         });
-        
-        function updateFilePreview(file) {
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            let fileIcon = '📄';
-            
-            if (file.type === 'application/pdf') fileIcon = '📕';
-            else if (file.type.includes('word')) fileIcon = '📝';
-            else if (file.type.includes('presentation')) fileIcon = '📊';
-            else if (file.type.includes('sheet') || file.type.includes('excel')) fileIcon = '📈';
-            else if (file.type.includes('image')) fileIcon = '🖼️';
-            
-            fileName.innerHTML = `${fileIcon} ${file.name} <span class="file-size-preview">(${fileSize} MB)</span>`;
-            filePreview.style.display = 'flex';
-            dropzoneContainer.style.display = 'none';
+
+        const data = await response.json();
+
+        if(data.success) {
+            Swal.fire({
+                title: 'Material publicado',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#00c6ff',
+                background: '#2a2f4a',
+                color: 'white'
+            }).then(() => {
+                window.location.href = "{% url 'course_detail' curso.id %}";
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+                confirmButtonColor: '#ff416c',
+                background: '#2a2f4a',
+                color: 'white'
+            });
+            if(btnText) btnText.textContent = "Subir Archivo";
         }
-        
-        function hidePreview() {
-            filePreview.style.display = 'none';
-            dropzoneContainer.style.display = 'flex';
-            fileInput.value = '';
-        }
-        
-        removeFileBtn.addEventListener('click', function() {
-            hidePreview();
+    } catch (error) {
+        Swal.fire({
+            title: 'Error de red',
+            text: 'No se pudo conectar con el servidor.',
+            icon: 'warning',
+            confirmButtonColor: '#ff416c',
+            background: '#2a2f4a',
+            color: 'white'
         });
-        
-        // Loading state on submit
-        const form = document.getElementById('uploadForm');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        form.addEventListener('submit', function() {
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-        });
-    </script>
+        if(btnText) btnText.textContent = "Subir Archivo";
+    }
+});
+</script>
 </body>
 </html>
