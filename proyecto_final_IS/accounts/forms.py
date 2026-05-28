@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-
+from accounts.models import Material
 from accounts.models import CustomUser
 
 
@@ -72,3 +72,21 @@ class ContactDataForm(forms.ModelForm):
             raise forms.ValidationError("Ese correo ya está registrado por otro usuario.")
 
         return email
+
+
+class MaterialForm(forms.ModelForm):
+    class Meta:
+        model = Material
+        fields = ['titulo', 'archivo']
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej. Unidad 1 - Introducción',
+                'required': 'true'
+            }),
+            'archivo': forms.FileInput(attrs={
+                'class': 'form-file-input',
+                'accept': '.pdf,.doc,.docx, .txt, .odt',
+                'required': 'true'
+            })
+        }
