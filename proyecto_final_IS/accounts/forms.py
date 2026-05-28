@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
+from accounts.models import CustomUser
+
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.EmailField(
@@ -20,3 +22,53 @@ class CustomLoginForm(AuthenticationForm):
             "autocomplete": "current-password"
         })
     )
+
+
+class ContactDataForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+
+        fields = [
+            "nombre_pila",
+            "apellido_paterno",
+            "apellido_materno",
+            "email",
+        ]
+
+        labels = {
+            "nombre_pila": "Nombre(s)",
+            "apellido_paterno": "Apellido paterno",
+            "apellido_materno": "Apellido materno",
+            "email": "Correo electrónico",
+        }
+
+        widgets = {
+            "nombre_pila": forms.TextInput(attrs={
+                "class": "contact-input",
+                "placeholder": "Nombre(s)",
+                "autocomplete": "given-name"
+            }),
+            "apellido_paterno": forms.TextInput(attrs={
+                "class": "contact-input",
+                "placeholder": "Apellido paterno",
+                "autocomplete": "family-name"
+            }),
+            "apellido_materno": forms.TextInput(attrs={
+                "class": "contact-input",
+                "placeholder": "Apellido materno",
+                "autocomplete": "additional-name"
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "contact-input",
+                "placeholder": "Correo electrónico",
+                "autocomplete": "email"
+            }),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+
+        if CustomUser.objects.filter(email=email).exclude(id=self.instance.id).exists():
+            raise forms.ValidationError("Ese correo ya está registrado por otro usuario.")
+
+        return email
