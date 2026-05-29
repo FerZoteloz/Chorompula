@@ -15,11 +15,18 @@
         </div>
 
         {% if error %}
-            <p style="color:#ffb3b3; text-align:center;">{{ error }}</p>
+            <p style="color:#ffb3b3; text-align:center; margin-bottom:16px;">
+                {{ error }}
+            </p>
         {% endif %}
 
         <div style="color:white; margin-bottom:20px; padding:12px; border:1px solid rgba(255,255,255,0.3); border-radius:12px;">
-            <p><strong>Usuario actual:</strong> {{ profile.user.nombre_pila }} {{ profile.user.apellido_paterno }} {{ profile.user.apellido_materno }}</p>
+            <p>
+                <strong>Usuario actual:</strong>
+                {{ profile.user.nombre_pila }}
+                {{ profile.user.apellido_paterno }}
+                {{ profile.user.apellido_materno }}
+            </p>
             <p><strong>Correo actual:</strong> {{ profile.user.email }}</p>
             <p><strong>Rol actual:</strong> {{ profile.get_role_display }}</p>
         </div>
@@ -29,37 +36,62 @@
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" name="nombre_pila" value="{{ profile.user.nombre_pila }}" required>
-                    <label>Nombre</label>
+                    <input
+                        type="text"
+                        name="nombre_pila"
+                        value="{{ profile.user.nombre_pila }}"
+                        required
+                    >
+                    <label>Nombre(s)</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" name="apellido_paterno" value="{{ profile.user.apellido_paterno }}" required>
+                    <input
+                        type="text"
+                        name="apellido_paterno"
+                        value="{{ profile.user.apellido_paterno }}"
+                        required
+                    >
                     <label>Apellido paterno</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" name="apellido_materno" value="{{ profile.user.apellido_materno }}" required>
+                    <input
+                        type="text"
+                        name="apellido_materno"
+                        value="{{ profile.user.apellido_materno }}"
+                        required
+                    >
                     <label>Apellido materno</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="email" name="email" value="{{ profile.user.email }}" required>
+                    <input
+                        type="email"
+                        name="email"
+                        value="{{ profile.user.email }}"
+                        required
+                    >
                     <label>Correo electrónico</label>
                 </div>
             </div>
 
             <div class="form-group">
-                <select name="role" class="btn" style="width:100%;">
-                    <option value="student" {% if profile.role == "student" %}selected{% endif %}>Estudiante</option>
-                    <option value="teacher" {% if profile.role == "teacher" %}selected{% endif %}>Profesor</option>
-                    <option value="admin" {% if profile.role == "admin" %}selected{% endif %}>Administrador</option>
+                <select name="role" class="btn" style="width:100%;" required>
+                    {% for value, label in roles_disponibles %}
+                        <option
+                            value="{{ value }}"
+                            {% if profile.role == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+                    {% endfor %}
                 </select>
             </div>
 
@@ -68,7 +100,7 @@
             </button>
         </form>
 
-        <a href="/admin-usuarios/" class="btn other-one-btn">
+        <a href="{% url 'lista_usuarios' %}" class="btn other-one-btn">
             Volver
         </a>
     </div>

@@ -5,17 +5,62 @@
     <meta charset="UTF-8">
     <title>Crear Usuario</title>
     <link rel="stylesheet" href="{% static 'style.css' %}">
+
+    <style>
+        .admin-form-input {
+            color: #111827 !important;
+            background: #ffffff !important;
+        }
+
+        .admin-form-label {
+            color: #111827 !important;
+        }
+
+        .admin-role-select {
+            width: 100%;
+            color: #111827 !important;
+            background: #ffffff !important;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .admin-role-select option {
+            color: #111827;
+            background: #ffffff;
+        }
+
+        .campo-extra {
+            display: none;
+        }
+
+        .campo-extra.activo {
+            display: block;
+        }
+
+        .helper-text {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.85rem;
+            margin-top: -8px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
             <h2>Crear usuario</h2>
-            <p>Registrar usuario con rol</p>
+            <p>Registrar usuario institucional con rol</p>
         </div>
 
         {% if error %}
-            <p style="color:#ffb3b3; text-align:center;">{{ error }}</p>
+            <p style="color:#ffb3b3; text-align:center; margin-bottom:16px;">
+                {{ error }}
+            </p>
         {% endif %}
 
         <form method="POST">
@@ -23,31 +68,70 @@
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" name="username" required>
-                    <label>Nombre de usuario</label>
+                    <input class="admin-form-input" type="text" name="nombre_pila" required>
+                    <label class="admin-form-label">Nombre(s)</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="email" name="email" required>
-                    <label>Correo electrónico</label>
+                    <input class="admin-form-input" type="text" name="apellido_paterno" required>
+                    <label class="admin-form-label">Apellido paterno</label>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="password" name="password" required>
-                    <label>Contraseña</label>
+                    <input class="admin-form-input" type="text" name="apellido_materno" required>
+                    <label class="admin-form-label">Apellido materno</label>
                 </div>
             </div>
 
             <div class="form-group">
-                <select name="role" class="btn" style="width:100%;">
-                    <option value="admin">Administrador</option>
-                    <option value="teacher">Profesor</option>
-                    <option value="student">Estudiante</option>
+                <div class="input-wrapper">
+                    <input class="admin-form-input" type="email" name="email" required>
+                    <label class="admin-form-label">Correo electrónico</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input class="admin-form-input" type="password" name="password" required>
+                    <label class="admin-form-label">Contraseña temporal</label>
+                </div>
+            </div>
+
+            <p class="helper-text">
+                Selecciona el rol para mostrar solo los datos necesarios.
+            </p>
+
+            <div class="form-group">
+                <select id="roleSelect" name="role" class="admin-role-select" required>
+                    {% for value, label in roles_disponibles %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
                 </select>
+            </div>
+
+            <div id="campoNumeroCuenta" class="form-group campo-extra">
+                <div class="input-wrapper">
+                    <input class="admin-form-input" type="number" name="numero_cuenta">
+                    <label class="admin-form-label">Número de cuenta</label>
+                </div>
+            </div>
+
+            <div id="campoNumeroEmpleado" class="form-group campo-extra">
+                <div class="input-wrapper">
+                    <input class="admin-form-input" type="number" name="numero_empleado">
+                    <label class="admin-form-label">Número de empleado</label>
+                </div>
+            </div>
+
+            <div id="campoEspecialidad" class="form-group campo-extra">
+                <div class="input-wrapper">
+                    <input class="admin-form-input" type="text" name="especialidad">
+                    <label class="admin-form-label">Especialidad</label>
+                </div>
             </div>
 
             <button type="submit" class="btn login-btn">
@@ -55,10 +139,57 @@
             </button>
         </form>
 
-        <a href="/dashboard/" class="btn other-one-btn">
-            Volver
+        <a href="{% url 'lista_usuarios' %}" class="btn other-one-btn">
+            Volver a usuarios
         </a>
     </div>
 </div>
+
+<script>
+const roleSelect = document.getElementById("roleSelect");
+const campoNumeroCuenta = document.getElementById("campoNumeroCuenta");
+const campoNumeroEmpleado = document.getElementById("campoNumeroEmpleado");
+const campoEspecialidad = document.getElementById("campoEspecialidad");
+
+const inputNumeroCuenta = campoNumeroCuenta.querySelector("input");
+const inputNumeroEmpleado = campoNumeroEmpleado.querySelector("input");
+const inputEspecialidad = campoEspecialidad.querySelector("input");
+
+function actualizarCamposPorRol() {
+    const rol = roleSelect.value;
+
+    campoNumeroCuenta.classList.remove("activo");
+    campoNumeroEmpleado.classList.remove("activo");
+    campoEspecialidad.classList.remove("activo");
+
+    inputNumeroCuenta.required = false;
+    inputNumeroEmpleado.required = false;
+    inputEspecialidad.required = false;
+
+    inputNumeroCuenta.value = "";
+    inputNumeroEmpleado.value = "";
+    inputEspecialidad.value = "";
+
+    if (rol === "student") {
+        campoNumeroCuenta.classList.add("activo");
+        inputNumeroCuenta.required = true;
+    }
+
+    if (rol === "teacher") {
+        campoNumeroEmpleado.classList.add("activo");
+        campoEspecialidad.classList.add("activo");
+        inputNumeroEmpleado.required = true;
+        inputEspecialidad.required = true;
+    }
+
+    if (rol === "admin") {
+        campoNumeroEmpleado.classList.add("activo");
+        inputNumeroEmpleado.required = true;
+    }
+}
+
+roleSelect.addEventListener("change", actualizarCamposPorRol);
+actualizarCamposPorRol();
+</script>
 </body>
 </html>

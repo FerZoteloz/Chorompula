@@ -6,9 +6,56 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
-from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Profesor, CoursePost, Material
+from accounts.models import Profile, Course, UsuarioCurso, CustomUser, Alumno, Administrador, Profesor, CoursePost, Material
 from accounts.forms import ContactDataForm
 import json
+
+def obtener_rol(user):
+    if hasattr(user, "profile"):
+        return user.profile.role
+
+    return None
+
+
+def es_superadmin(user):
+    return obtener_rol(user) == "superadmin"
+
+
+def es_admin(user):
+    return obtener_rol(user) == "admin"
+
+
+def es_profesor(user):
+    return obtener_rol(user) == "teacher"
+
+
+def es_alumno(user):
+    return obtener_rol(user) == "student"
+
+
+def puede_gestionar_usuarios(user):
+    return obtener_rol(user) in ["superadmin", "admin"]
+
+def puede_ver_cursos_admin(user):
+    return obtener_rol(user) in ["superadmin", "admin"]
+
+
+def roles_que_puede_crear(user):
+    if es_superadmin(user):
+        return [
+            ("admin", "Administrador"),
+            ("teacher", "Profesor"),
+            ("student", "Estudiante"),
+        ]
+
+    if es_admin(user):
+        return [
+            ("admin", "Administrador"),
+            ("teacher", "Profesor"),
+            ("student", "Estudiante"),
+        ]
+
+    return []
 
 
 def login_view(request):
@@ -186,8 +233,21 @@ def dashboard_view(request):
         "courses": courses
     }
 
-    if role == "admin":
-        return render(request, "admin_usuarios/lista_usuarios.html", context)
+    if role in ["superadmin", "admin"]:
+        total_usuarios = Profile.objects.count()
+        total_admins = Profile.objects.filter(role="admin").count()
+        total_profesores = Profile.objects.filter(role="teacher").count()
+        total_estudiantes = Profile.objects.filter(role="student").count()
+        total_cursos = Course.objects.count()
+
+        return render(request, "dashboards/admin.html", {
+            "courses": courses,
+            "total_usuarios": total_usuarios,
+            "total_admins": total_admins,
+            "total_profesores": total_profesores,
+            "total_estudiantes": total_estudiantes,
+            "total_cursos": total_cursos,
+        })
 
     elif role == "teacher":
         return render(request, "dashboards/teacher.html", context)
@@ -260,20 +320,141 @@ def course_detail_view(request, course_id):
 
 @login_required
 def lista_usuarios_view(request):
-    profiles = Profile.objects.all()
+    if not puede_gestionar_usuarios(request.user):
+        return redirect("dashboard")
+
+    profiles = Profile.objects.select_related("user").all().order_by(
+        "role",
+        "user__email"
+    )
 
     return render(request, "admin_usuarios/lista_usuarios.html", {
         "profiles": profiles
     })
 
+
+@login_required
+def crear_usuario_view(request):
+    if not puede_gestionar_usuarios(request.user):
+        return redirect("dashboard")
+
+    roles_disponibles = roles_que_puede_crear(request.user)
+
+    if request.method == "GET":
+        return render(request, "admin_usuarios/crear_usuario.html", {
+            "roles_disponibles": roles_disponibles
+        })
+
+    if request.method == "POST":
+        nombre_pila = request.POST.get("nombre_pila", "").strip()
+        apellido_paterno = request.POST.get("apellido_paterno", "").strip()
+        apellido_materno = request.POST.get("apellido_materno", "").strip()
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "").strip()
+        role = request.POST.get("role")
+
+        numero_cuenta = request.POST.get("numero_cuenta", "").strip()
+        numero_empleado = request.POST.get("numero_empleado", "").strip()
+        especialidad = request.POST.get("especialidad", "").strip()
+
+        roles_permitidos = [rol[0] for rol in roles_disponibles]
+
+        if role not in roles_permitidos:
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "No tienes permiso para crear usuarios con ese rol."
+            })
+
+        if not nombre_pila or not apellido_paterno or not apellido_materno or not email or not password:
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "Todos los campos personales son obligatorios."
+            })
+
+        if role == "student" and not numero_cuenta:
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "El número de cuenta es obligatorio para estudiantes."
+            })
+
+        if role == "teacher" and (not numero_empleado or not especialidad):
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "El número de empleado y la especialidad son obligatorios para profesores."
+            })
+
+        if role == "admin" and not numero_empleado:
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "El número de empleado es obligatorio para administradores."
+            })
+
+        if CustomUser.objects.filter(email=email).exists():
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": "Ese correo ya está registrado."
+            })
+
+        try:
+            with transaction.atomic():
+                user = CustomUser.objects.create_user(
+                    email=email,
+                    password=password,
+                    nombre_pila=nombre_pila,
+                    apellido_paterno=apellido_paterno,
+                    apellido_materno=apellido_materno
+                )
+
+                profile = Profile.objects.create(
+                    user=user,
+                    role=role
+                )
+
+                if role == "teacher":
+                    Profesor.objects.create(
+                        perfil=profile,
+                        numero_empleado=numero_empleado,
+                        especialidad=especialidad,
+                        grado_academico="No especificado"
+                    )
+
+                elif role == "student":
+                    Alumno.objects.create(
+                        perfil=profile,
+                        numero_cuenta=numero_cuenta
+                    )
+
+                elif role == "admin":
+                    Administrador.objects.create(
+                        perfil=profile,
+                        numero_empleado=numero_empleado
+                    )
+
+            return redirect("lista_usuarios")
+
+        except Exception as e:
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "roles_disponibles": roles_disponibles,
+                "error": str(e)
+            })
+
+    return redirect("lista_usuarios")
+
 # Ini.FS.19.05.2026
 @login_required
 def editar_usuario_view(request, profile_id):
+    if not puede_gestionar_usuarios(request.user):
+        return redirect("dashboard")
+
     profile = get_object_or_404(Profile, id=profile_id)
+
+    if profile.role == "superadmin" and not es_superadmin(request.user):
+        return redirect("lista_usuarios")
 
     if request.method == "GET":
         return render(request, "admin_usuarios/editar_usuario.html", {
-            "profile": profile
+            "profile": profile,
+            "roles_disponibles": roles_que_puede_crear(request.user)
         })
 
     if request.method == "POST":
@@ -282,6 +463,14 @@ def editar_usuario_view(request, profile_id):
         apellido_materno = request.POST.get("apellido_materno")
         email = request.POST.get("email")
         role = request.POST.get("role")
+        roles_permitidos = [rol[0] for rol in roles_que_puede_crear(request.user)]
+
+        if role not in roles_permitidos:
+            return render(request, "admin_usuarios/editar_usuario.html", {
+                "profile": profile,
+                "roles_disponibles": roles_que_puede_crear(request.user),
+                "error": "No tienes permiso para asignar ese rol."
+            })
 
         if CustomUser.objects.filter(email=email).exclude(id=profile.user.id).exists():
             return render(request, "admin_usuarios/editar_usuario.html", {
@@ -302,6 +491,43 @@ def editar_usuario_view(request, profile_id):
 
 
 # Fin.FS.19.05.2026
+
+
+@login_required
+def lista_cursos_admin_view(request):
+    if not puede_ver_cursos_admin(request.user):
+        return redirect("dashboard")
+
+    cursos = Course.objects.all().order_by("title")
+
+    cursos_info = []
+
+    for curso in cursos:
+        profesores = UsuarioCurso.objects.filter(
+            curso=curso,
+            rol_en_curso="teacher"
+        ).select_related("usuario")
+
+        total_alumnos = UsuarioCurso.objects.filter(
+            curso=curso,
+            rol_en_curso="student"
+        ).count()
+
+        materiales = Material.objects.filter(
+            course=curso
+        ).order_by("-fecha_subida")
+
+        cursos_info.append({
+            "curso": curso,
+            "profesores": profesores,
+            "total_alumnos": total_alumnos,
+            "materiales": materiales,
+        })
+
+    return render(request, "admin_usuarios/lista_cursos.html", {
+        "cursos_info": cursos_info
+    })
+
 
 @login_required
 def crear_curso_view(request):
@@ -717,12 +943,6 @@ def cerrar_curso_view(request, course_id):
 
         course.estado = "cerrado"
         course.save()
-
-    return redirect(
-        "course_detail",
-        course_id=course.id
-    )
-
 
     return redirect(
         "course_detail",
