@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionar cursos</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <aside class="sidebar-card">
+        <div class="user-profile">
+            <a href="{% url 'profile_settings' %}" class="profile-avatar-link">
+                <div class="profile-avatar">
+                    {% if user.profile.avatar_image %}
+                        <img src="{{ user.profile.avatar_image.url }}" alt="Foto de perfil">
+                    {% elif user.profile.avatar_emoji %}
+                        {{ user.profile.avatar_emoji }}
+                    {% else %}
+                        🛡️
+                    {% endif %}
+                </div>
+            </a>
+
+            <h3>{{ user.nombre_pila }}</h3>
+            <p>{{ user.profile.get_role_display }}</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item">Panel principal</a>
+            <a href="{% url 'lista_usuarios' %}" class="nav-item">Gestionar usuarios</a>
+            <a href="{% url 'crear_usuario' %}" class="nav-item">Crear usuario</a>
+            <a href="{% url 'lista_cursos_admin' %}" class="nav-item active">Gestionar cursos</a>
+            <a href="{% url 'settings' %}" class="nav-item">Configuración</a>
+        </nav>
+
+        <button class="btn logout-btn" onclick="logout()">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h2>Gestionar cursos</h2>
+
+            <div class="stats-row">
+                <div class="stat-badge">Cursos: {{ cursos_info|length }}</div>
+                <div class="stat-badge">Rol: {{ user.profile.get_role_display }}</div>
+            </div>
+        </header>
+
+        <div style="margin-bottom: 24px;">
+            <input
+                type="text"
+                id="buscadorCursos"
+                placeholder="Buscar por curso, idioma, código o profesor"
+                style="
+                    width: 100%;
+                    max-width: 620px;
+                    padding: 14px 18px;
+                    border-radius: 14px;
+                    border: 2px solid #06b6d4;
+                    outline: none;
+                    color: #111827;
+                    background: #ffffff;
+                    font-size: 15px;
+                "
+            >
+        </div>
+
+        <div class="courses-grid" id="listaCursos">
+            {% for item in cursos_info %}
+                <div class="course-card curso-card">
+                    <div class="course-flag">
+                        {{ item.curso.flag }}
+                    </div>
+
+                    <div class="course-info">
+                        <h4>{{ item.curso.title }}</h4>
+
+                        <p>
+                            <strong>Idioma:</strong>
+                            {{ item.curso.language }}
+                        </p>
+
+                        <p>
+                            <strong>Código:</strong>
+                            {{ item.curso.codigo_inscripcion }}
+                        </p>
+
+                        <p>
+                            <strong>Estado:</strong>
+                            {{ item.curso.get_estado_display }}
+                        </p>
+
+                        <p>
+                            <strong>Profesor(es):</strong>
+                            {% for relacion in item.profesores %}
+                                {{ relacion.usuario.nombre_pila }}
+                                {{ relacion.usuario.apellido_paterno }}
+                                {% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Sin profesor asignado
+                            {% endfor %}
+                        </p>
+
+                        <p>
+                            <strong>Alumnos inscritos:</strong>
+                            {{ item.total_alumnos }}
+                        </p>
+
+                        <p>
+                            <strong>Materiales:</strong>
+                            {{ item.materiales|length }}
+                        </p>
+                    </div>
+
+                    <a href="{% url 'detalle_curso' item.curso.id %}" class="btn-sm course-action-btn">
+                        Ver detalle
+                    </a>
+                </div>
+            {% empty %}
+                <p>No hay cursos registrados.</p>
+            {% endfor %}
+        </div>
+
+        <p id="sinResultadosCursos" style="
+            display:none;
+            color:white;
+            text-align:center;
+            margin-top:18px;
+        ">
+            No se encontraron cursos con esa búsqueda.
+        </p>
+    </main>
+
+</div>
+
+<script>
+function logout() {
+    window.location.href = "/logout/";
+}
+
+const buscadorCursos = document.getElementById("buscadorCursos");
+const cursos = document.querySelectorAll(".curso-card");
+const sinResultadosCursos = document.getElementById("sinResultadosCursos");
+
+buscadorCursos.addEventListener("input", function () {
+    const texto = buscadorCursos.value.toLowerCase().trim();
+    let visibles = 0;
+
+    cursos.forEach(function (curso) {
+        const contenido = curso.textContent.toLowerCase();
+
+        if (contenido.includes(texto)) {
+            curso.style.display = "block";
+            visibles++;
+        } else {
+            curso.style.display = "none";
+        }
+    });
+
+    if (visibles === 0) {
+        sinResultadosCursos.style.display = "block";
+    } else {
+        sinResultadosCursos.style.display = "none";
+    }
+});
+</script>
+</body>
+</html>

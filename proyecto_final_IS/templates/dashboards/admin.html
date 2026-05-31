@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador</title>
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <aside class="sidebar-card">
+        <div class="user-profile">
+            <a href="{% url 'profile_settings' %}" class="profile-avatar-link">
+                <div class="profile-avatar">
+                    {% if user.profile.avatar_image %}
+                        <img src="{{ user.profile.avatar_image.url }}" alt="Foto de perfil">
+                    {% elif user.profile.avatar_emoji %}
+                        {{ user.profile.avatar_emoji }}
+                    {% else %}
+                        🛡️
+                    {% endif %}
+                </div>
+            </a>
+
+            <h3>{{ user.nombre_pila }}</h3>
+            <p>{{ user.profile.get_role_display }}</p>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="nav-item active">Panel principal</a>
+            <a href="{% url 'lista_usuarios' %}" class="nav-item">Gestionar usuarios</a>
+            <a href="{% url 'crear_usuario' %}" class="nav-item">Crear usuario</a>
+            <a href="{% url 'lista_cursos_admin' %}" class="nav-item">Gestionar cursos</a>
+            <a href="{% url 'settings' %}" class="nav-item">Configuración</a>
+        </nav>
+
+        <button class="btn logout-btn" onclick="logout()">Cerrar sesión</button>
+    </aside>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h2>Panel administrativo</h2>
+
+            <div class="stats-row">
+                <div class="stat-badge">Usuarios: {{ total_usuarios }}</div>
+                <div class="stat-badge">Cursos: {{ total_cursos }}</div>
+                <div class="stat-badge">Rol: {{ user.profile.get_role_display }}</div>
+            </div>
+        </header>
+
+        <div class="courses-grid">
+
+            <div class="course-card">
+                <div class="course-flag">
+                    👥
+                </div>
+
+                <div class="course-info">
+                    <h4>Usuarios registrados</h4>
+                    <p>Total del sistema: {{ total_usuarios }}</p>
+                </div>
+
+                <a href="{% url 'lista_usuarios' %}" class="btn-sm course-action-btn">
+                    Ver usuarios
+                </a>
+            </div>
+
+            <div class="course-card">
+                <div class="course-flag">
+                    ➕
+                </div>
+
+                <div class="course-info">
+                    <h4>Crear usuario</h4>
+                    <p>Registrar administradores, profesores o estudiantes.</p>
+                </div>
+
+                <a href="{% url 'crear_usuario' %}" class="btn-sm course-action-btn">
+                    Crear
+                </a>
+            </div>
+
+            <div class="course-card">
+                <div class="course-flag">
+                    📚
+                </div>
+
+                <div class="course-info">
+                    <h4>Gestionar cursos</h4>
+                    <p>Ver cursos, profesores asignados, alumnos inscritos y materiales.</p>
+                </div>
+
+                <a href="{% url 'lista_cursos_admin' %}" class="btn-sm course-action-btn">
+                    Ver cursos
+                </a>
+            </div>
+
+            <div class="course-card">
+                <div class="course-flag">
+                    🛡️
+                </div>
+
+                <div class="course-info">
+                    <h4>Administradores</h4>
+                    <p>Total: {{ total_admins }}</p>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div class="course-flag">
+                    👨‍🏫
+                </div>
+
+                <div class="course-info">
+                    <h4>Profesores</h4>
+                    <p>Total: {{ total_profesores }}</p>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div class="course-flag">
+                    🎓
+                </div>
+
+                <div class="course-info">
+                    <h4>Estudiantes</h4>
+                    <p>Total: {{ total_estudiantes }}</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<script>
+function logout() {
+    window.location.href = "/logout/";
+}
+</script>
+</body>
+</html>

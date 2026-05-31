@@ -7,57 +7,169 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
-<div class="login-container" style="max-width: 520px;">
+<div class="login-container" style="max-width: 760px;">
     <div class="login-card">
         <div class="login-header">
             <h2>Usuarios registrados</h2>
             <p>Lista de usuarios del sistema</p>
         </div>
 
-        {% for profile in profiles %}
-            <div style="
+        <div style="
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:20px;
+        ">
+            <a href="{% url 'crear_usuario' %}"
+               style="
+                flex:1;
+                min-width:180px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
                 color:white;
-                margin-bottom:18px;
-                padding:16px;
-                border:1px solid rgba(255,255,255,0.3);
-                border-radius:12px;
-            ">
-                <p><strong>Usuario:</strong> {{ profile.user.username }}</p>
-                <p><strong>Correo:</strong> {{ profile.user.email }}</p>
-                <p><strong>Rol:</strong> {{ profile.get_role_display }}</p>
+                font-weight:600;
+                text-decoration:none;
+               ">
+                + Crear usuario
+            </a>
 
-                <a href="/admin-usuarios/editar/{{ profile.id }}/"
-                   style="
-                    display:inline-block;
-                    margin-top:12px;
-                    padding:10px 16px;
-                    border-radius:10px;
-                    background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-                    color:white;
-                    font-weight:600;
-                    text-decoration:none;
-                   ">
-                    Cambiar rol / editar
-                </a>
+            <a href="{% url 'dashboard' %}"
+               style="
+                flex:1;
+                min-width:180px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+                color:white;
+                font-weight:600;
+                text-decoration:none;
+               ">
+                Panel principal
+            </a>
+
+            <a href="{% url 'logout' %}"
+               style="
+                flex:1;
+                min-width:180px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+                color:white;
+                font-weight:600;
+                text-decoration:none;
+               ">
+                Cerrar sesión
+            </a>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="buscadorUsuarios"
+                    placeholder="Buscar por nombre, correo o rol"
+                    style="
+                        color:#111827;
+                        background:#ffffff;
+                    "
+                >
+                <label style="color:#111827;">
+                    Buscar usuario
+                </label>
             </div>
-        {% empty %}
-            <p style="color:white;">No hay usuarios registrados.</p>
-        {% endfor %}
+        </div>
 
-        <a href="/dashboard/"
-           style="
-            display:inline-block;
-            margin-top:12px;
-            padding:12px 18px;
-            border-radius:10px;
-            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+        <div id="listaUsuarios">
+            {% for profile in profiles %}
+                <div class="usuario-card" style="
+                    color:white;
+                    margin-bottom:18px;
+                    padding:16px;
+                    border:1px solid rgba(255,255,255,0.3);
+                    border-radius:12px;
+                ">
+                    <p>
+                        <strong>Nombre:</strong>
+                        <span class="usuario-nombre">
+                            {{ profile.user.nombre_pila }}
+                            {{ profile.user.apellido_paterno }}
+                            {{ profile.user.apellido_materno }}
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Correo:</strong>
+                        <span class="usuario-correo">{{ profile.user.email }}</span>
+                    </p>
+
+                    <p>
+                        <strong>Rol:</strong>
+                        <span class="usuario-rol">{{ profile.get_role_display }}</span>
+                    </p>
+
+                    <a href="{% url 'editar_usuario' profile.id %}"
+                       style="
+                        display:inline-block;
+                        margin-top:12px;
+                        padding:10px 16px;
+                        border-radius:10px;
+                        background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+                        color:white;
+                        font-weight:600;
+                        text-decoration:none;
+                       ">
+                        Cambiar rol / editar
+                    </a>
+                </div>
+            {% empty %}
+                <p style="color:white;">No hay usuarios registrados.</p>
+            {% endfor %}
+        </div>
+
+        <p id="sinResultados" style="
+            display:none;
             color:white;
-            font-weight:600;
-            text-decoration:none;
-           ">
-            Volver
-        </a>
+            text-align:center;
+            margin-top:18px;
+        ">
+            No se encontraron usuarios con esa búsqueda.
+        </p>
     </div>
 </div>
+
+<script>
+const buscador = document.getElementById("buscadorUsuarios");
+const usuarios = document.querySelectorAll(".usuario-card");
+const sinResultados = document.getElementById("sinResultados");
+
+buscador.addEventListener("input", function () {
+    const texto = buscador.value.toLowerCase().trim();
+    let visibles = 0;
+
+    usuarios.forEach(function (usuario) {
+        const contenido = usuario.textContent.toLowerCase();
+
+        if (contenido.includes(texto)) {
+            usuario.style.display = "block";
+            visibles++;
+        } else {
+            usuario.style.display = "none";
+        }
+    });
+
+    if (visibles === 0) {
+        sinResultados.style.display = "block";
+    } else {
+        sinResultados.style.display = "none";
+    }
+});
+</script>
 </body>
 </html>

@@ -1,49 +1,55 @@
 from django.db import models
-# from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.conf import settings
 import random
 import string
-from django.conf import settings
 
-
-# Create your models here.
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('El correo es obligatorio')
+            raise ValueError("El correo es obligatorio")
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
         return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
-    username = None  # Eliminamos el username
-    email = models.EmailField('correo electrónico', unique=True)
+    username = None
+    email = models.EmailField("correo electrónico", unique=True)
 
-    # Tenemos que hacer que coincidan con la DB propuesta originalmente
     nombre_pila = models.CharField(max_length=50)
     apellido_paterno = models.CharField(max_length=30)
     apellido_materno = models.CharField(max_length=30)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['nombre_pila', 'apellido_paterno']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = [
+        "nombre_pila",
+        "apellido_paterno",
+    ]
 
     objects = UsuarioManager()
+
+    def __str__(self):
+        return self.email
 
 
 class Profile(models.Model):
     ROLE_CHOICES = (
-        ('admin', 'Administrador'),
-        ('teacher', 'Profesor'),
-        ('student', 'Estudiante'),
+        ("superadmin", "Superadministrador"),
+        ("admin", "Administrador"),
+        ("teacher", "Profesor"),
+        ("student", "Estudiante"),
     )
 
     user = models.OneToOneField(
@@ -56,7 +62,6 @@ class Profile(models.Model):
         choices=ROLE_CHOICES
     )
 
-    # Ini.FS.19.05.2026
     avatar_emoji = models.CharField(
         max_length=10,
         blank=True,
@@ -70,22 +75,48 @@ class Profile(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.email} - {self.role}"
+        return f"{self.user.email} - {self.get_role_display()}"
 
 
 class Alumno(models.Model):
-    perfil = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
+    perfil = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
+
     numero_cuenta = models.IntegerField(unique=True)
 
     def __str__(self):
         return f"{self.perfil.user.email} - {self.numero_cuenta}"
 
 
+class Administrador(models.Model):
+    perfil = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
+
+    numero_empleado = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return f"{self.perfil.user.email} - {self.numero_empleado}"
+
+
 class Profesor(models.Model):
-    perfil = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
+    perfil = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
+
     numero_empleado = models.IntegerField(unique=True)
     especialidad = models.CharField(max_length=50)
-    grado_academico = models.CharField(max_length=50)
+    grado_academico = models.CharField(
+        max_length=50,
+        default="No especificado"
+    )
 
     def __str__(self):
         return f"{self.perfil.user.email} - {self.especialidad}"
@@ -96,14 +127,11 @@ class Course(models.Model):
         ("activo", "Activo"),
         ("cerrado", "Cerrado"),
     ]
+
     title = models.CharField(max_length=100)
-
     language = models.CharField(max_length=50)
-
     flag = models.CharField(max_length=10)
-
     week = models.IntegerField(default=1)
-
     progress = models.IntegerField(default=0)
 
     estado = models.CharField(
@@ -126,9 +154,14 @@ class Course(models.Model):
 
     def generar_codigo(self):
         letras = self.language[:3].upper() if self.language else "CUR"
-        aleatorio = ''.join(
-            random.choices(string.ascii_uppercase + string.digits, k=5)
+
+        aleatorio = "".join(
+            random.choices(
+                string.ascii_uppercase + string.digits,
+                k=5
+            )
         )
+
         return f"{letras}-{aleatorio}"
 
     def save(self, *args, **kwargs):
@@ -148,8 +181,8 @@ class Course(models.Model):
 
 class UsuarioCurso(models.Model):
     ROL_CURSO_CHOICES = (
-        ('teacher', 'Profesor'),
-        ('student', 'Estudiante'),
+        ("teacher", "Profesor"),
+        ("student", "Estudiante"),
     )
 
     usuario = models.ForeignKey(
@@ -170,9 +203,12 @@ class UsuarioCurso(models.Model):
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('usuario', 'curso', 'rol_en_curso')
+        unique_together = (
+            "usuario",
+            "curso",
+            "rol_en_curso"
+        )
 
-    # Fin.FS.19.05.2026
     def __str__(self):
         return f"{self.usuario.email} - {self.curso.title} - {self.rol_en_curso}"
 
@@ -190,7 +226,6 @@ class CoursePost(models.Model):
     )
 
     content = models.TextField()
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -198,10 +233,9 @@ class CoursePost(models.Model):
 
 
 class Material(models.Model):
-
     ESTADO_CHOICES = [
-        ('borrador', '📝 Borrador'),
-        ('publicado', '✅ Publicado'),
+        ("borrador", "📝 Borrador"),
+        ("publicado", "✅ Publicado"),
     ]
 
     course = models.ForeignKey(
@@ -216,14 +250,16 @@ class Material(models.Model):
     )
 
     titulo = models.CharField(max_length=150)
-
     description = models.TextField(blank=True)
-
     archivo = models.FileField(upload_to="materiales_cursos/")
 
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='borrador')
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default="borrador"
+    )
 
     fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} - {self.course.titulo}"
+        return f"{self.titulo} - {self.course.title}"

@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel administrativo</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<div class="login-container" style="max-width: 760px;">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Panel administrativo</h2>
+            <p>Gestión institucional del sistema</p>
+        </div>
+
+        <div style="
+            color:white;
+            margin-bottom:22px;
+            padding:16px;
+            border:1px solid rgba(255,255,255,0.3);
+            border-radius:12px;
+            text-align:left;
+        ">
+            <p>
+                <strong>Usuario:</strong>
+                {{ request.user.nombre_pila }}
+                {{ request.user.apellido_paterno }}
+                {{ request.user.apellido_materno }}
+            </p>
+            <p><strong>Correo:</strong> {{ request.user.email }}</p>
+            <p><strong>Rol:</strong> {{ request.user.profile.get_role_display }}</p>
+        </div>
+
+        <div style="
+            display:grid;
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            gap:14px;
+            margin-bottom:24px;
+        ">
+            <div style="
+                color:white;
+                padding:16px;
+                border:1px solid rgba(255,255,255,0.3);
+                border-radius:12px;
+                text-align:center;
+            ">
+                <h3>{{ total_usuarios }}</h3>
+                <p>Usuarios</p>
+            </div>
+
+            <div style="
+                color:white;
+                padding:16px;
+                border:1px solid rgba(255,255,255,0.3);
+                border-radius:12px;
+                text-align:center;
+            ">
+                <h3>{{ total_admins }}</h3>
+                <p>Administradores</p>
+            </div>
+
+            <div style="
+                color:white;
+                padding:16px;
+                border:1px solid rgba(255,255,255,0.3);
+                border-radius:12px;
+                text-align:center;
+            ">
+                <h3>{{ total_profesores }}</h3>
+                <p>Profesores</p>
+            </div>
+
+            <div style="
+                color:white;
+                padding:16px;
+                border:1px solid rgba(255,255,255,0.3);
+                border-radius:12px;
+                text-align:center;
+            ">
+                <h3>{{ total_estudiantes }}</h3>
+                <p>Estudiantes</p>
+            </div>
+        </div>
+
+        <div style="
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+        ">
+            <a href="{% url 'lista_usuarios' %}"
+               style="
+                flex:1;
+                min-width:200px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+                color:white;
+                font-weight:600;
+                text-decoration:none;
+               ">
+                Ver usuarios
+            </a>
+
+            <a href="{% url 'crear_usuario' %}"
+               style="
+                flex:1;
+                min-width:200px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
+                color:white;
+                font-weight:600;
+                text-decoration:none;
+               ">
+                Crear usuario
+            </a>
+
+            <a href="{% url 'logout' %}"
+               style="
+                flex:1;
+                min-width:200px;
+                display:inline-block;
+                text-align:center;
+                padding:12px 18px;
+                border-radius:10px;
+                background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+                color:white;
+                font-weight:600;
+                text-decoration:none;
+               ">
+                Cerrar sesión
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

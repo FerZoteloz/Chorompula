@@ -26,8 +26,10 @@ from accounts.views import (
     dashboard_view,
     course_detail_view,
     lista_usuarios_view,
+    crear_usuario_view,
     editar_usuario_view,
     crear_curso_view,
+    lista_cursos_admin_view,
     detalle_curso_view,
     asignar_profesor_view,
 # Ini.FS.19.05.2026
@@ -60,8 +62,10 @@ urlpatterns = [
     path('dashboard/', dashboard_view, name='dashboard'),
 
     path('admin-usuarios/', lista_usuarios_view, name='lista_usuarios'),
+    path('admin-usuarios/crear/', crear_usuario_view, name='crear_usuario'),
     path('admin-usuarios/editar/<int:profile_id>/', editar_usuario_view, name='editar_usuario'),
 
+    path('admin-cursos/', lista_cursos_admin_view, name='lista_cursos_admin'),
     path('admin-cursos/crear/', crear_curso_view, name='crear_curso'),
     path('admin-cursos/<int:course_id>/', detalle_curso_view, name='detalle_curso'),
     path('admin-cursos/<int:course_id>/asignar-profesor/', asignar_profesor_view, name='asignar_profesor'),
