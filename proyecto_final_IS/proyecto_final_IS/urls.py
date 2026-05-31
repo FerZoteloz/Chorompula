@@ -46,6 +46,8 @@ from accounts.views import (
     eliminar_borrador_view,
     eliminar_material_view,
     cerrar_curso_view,
+    explorar_cursos_view,
+    inscribirse_directo_view,
 )
 
 urlpatterns = [
@@ -86,6 +88,8 @@ urlpatterns = [
     path("borrador/<int:material_id>/eliminar/", eliminar_borrador_view, name="eliminar_borrador"),
     path("material/<int:material_id>/eliminar/", eliminar_material_view, name="eliminar_material"),
     path("course/<int:course_id>/cerrar/", cerrar_curso_view, name="cerrar_curso"),
+    path('explorar-cursos/', explorar_cursos_view, name='explorar_cursos'),
+    path('curso/<int:course_id>/inscribirse-directo/', inscribirse_directo_view, name='inscribirse_directo'),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
