@@ -725,12 +725,6 @@ def cerrar_curso_view(request, course_id):
         course_id=course.id
     )
 
-
-    return redirect(
-        "course_detail",
-        course_id=course.id
-    )
-
 @login_required
 def explorar_cursos_view(request):
     if request.user.profile.role != "student":
